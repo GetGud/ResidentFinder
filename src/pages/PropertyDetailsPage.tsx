@@ -106,19 +106,32 @@ export function PropertyDetailsPage() {
             {/* --- Sticky Header --- */}
             <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="flex items-center text-sm text-slate-500 space-x-2">
-                        <Link to="/search" className="flex items-center gap-2 text-[#134e4a] hover:underline">
-                            <ArrowLeft className="w-4 h-4" />
-                            <span>Back to Search</span>
-                        </Link>
-                        <ChevronRight className="w-4 h-4" />
-                        <span className="font-medium text-slate-900">{property.address}</span>
-                        {property.isVerified && (
-                            <span className="ml-2 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                                <BadgeCheck className="w-3 h-3" />
-                                VERIFIED
+                    <div className="flex items-center text-sm text-slate-500 space-x-4">
+                        {/* Logo */}
+                        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+                            <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
+                                <span className="text-white font-bold text-lg">R</span>
+                            </div>
+                            <span className="text-xl font-extrabold tracking-tight text-[#134e4a] hidden md:block">
+                                Resident<span className="font-light text-gray-500">Finder</span>
                             </span>
-                        )}
+                        </Link>
+
+                        <div className="hidden sm:flex items-center space-x-2">
+                            <span className="text-slate-300">|</span>
+                            <Link to="/search" className="flex items-center gap-1.5 text-[#134e4a] hover:underline">
+                                <ArrowLeft className="w-4 h-4" />
+                                <span>Back to Search</span>
+                            </Link>
+                            <ChevronRight className="w-4 h-4" />
+                            <span className="font-medium text-slate-900 truncate max-w-[200px]">{property.address}</span>
+                            {property.isVerified && (
+                                <span className="ml-2 bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                                    <BadgeCheck className="w-3 h-3" />
+                                    VERIFIED
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <div className="flex items-center space-x-4">
                         <button
