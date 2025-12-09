@@ -90,3 +90,44 @@ html, body {
 .slide-in-from-bottom-4 {
   animation-name: slide-in-from-bottom;
 }
+
+/* Button press animation utility */
+.btn-press {
+  transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Filter active indicator dot */
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+.filter-active-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Image skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Map marker pulse for new listings */
+@keyframes marker-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(19, 78, 74, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(19, 78, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(19, 78, 74, 0); }
+}
+
+.marker-new {
+  animation: marker-pulse 2s infinite;
+}
+
+/* Hover sync highlight */
+.hover-synced {
+  box-shadow: 0 0 0 3px rgba(19, 78, 74, 0.3);
+}

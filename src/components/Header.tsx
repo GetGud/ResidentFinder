@@ -68,6 +68,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
     };
 
     const hasActiveFilters = filters && (filters.priceRange || filters.beds !== null || filters.petsAllowed);
+    const activeFilterCount = [filters?.priceRange, filters?.beds !== null && filters?.beds !== undefined ? true : null, filters?.petsAllowed].filter(Boolean).length;
 
     const clearFilters = () => {
         if (onFilterChange) {
@@ -110,7 +111,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                                 defaultValue="Seattle, WA"
                                 onChange={(e) => onSearch?.(e.target.value)}
                             />
-                            <button className="absolute inset-y-1 right-1 bg-[#134e4a] text-white px-4 rounded-full text-sm font-semibold hover:bg-[#0f3f3c] transition-colors">
+                            <button className="absolute inset-y-1 right-1 bg-[#134e4a] text-white px-4 rounded-full text-sm font-semibold hover:bg-[#0f3f3c] transition-colors btn-press">
                                 Search
                             </button>
                         </div>
@@ -225,7 +226,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                     </button>
 
                     <FilterButton label="Move-In Date" />
-                    <FilterButton label="More" icon={Filter} />
+                    <FilterButton label="More" icon={Filter} badge={activeFilterCount > 0 ? activeFilterCount : undefined} />
 
                     <div className="h-6 w-px bg-gray-200 mx-2 flex-shrink-0"></div>
 
@@ -306,10 +307,10 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
     );
 };
 
-const FilterButton = ({ label, value, active = false, icon: Icon }: { label: string, value?: string, active?: boolean, icon?: any }) => (
+const FilterButton = ({ label, value, active = false, icon: Icon, badge }: { label: string, value?: string, active?: boolean, icon?: any, badge?: number }) => (
     <button
         className={cn(
-            "flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
+            "flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all whitespace-nowrap btn-press relative",
             active
                 ? "bg-[#134e4a]/10 border-[#134e4a] text-[#134e4a]"
                 : "bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
@@ -319,6 +320,12 @@ const FilterButton = ({ label, value, active = false, icon: Icon }: { label: str
         {label}
         {value && <span className="text-[#134e4a] font-bold ml-1">{value}</span>}
         <ChevronDown className={cn("w-3.5 h-3.5 opacity-50", active && "text-[#134e4a]")} />
+        {badge && badge > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#134e4a] text-white text-[10px] font-bold rounded-full flex items-center justify-center filter-active-dot">
+                {badge}
+            </span>
+        )}
     </button>
 );
+
 

@@ -13,10 +13,20 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
+import { RecentlyViewedCarousel } from '../components/RecentlyViewedCarousel';
+import { MOCK_PROPERTIES } from '../data/mockData';
 
 // --- Header Component with Mobile Menu ---
 const Header = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const handleLogoClick = (e: React.MouseEvent) => {
+        if (window.location.pathname === '/') {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     return (
         <>
@@ -24,7 +34,7 @@ const Header = () => {
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-8">
                         {/* Logo */}
-                        <Link to="/" className="flex items-center gap-2">
+                        <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
                                 <span className="text-white font-bold text-lg">R</span>
                             </div>
@@ -218,127 +228,154 @@ const HeroSearch = () => {
 
                     {/* Rent Tab Content */}
                     {activeTab === 'rent' && (
-                        <div className="p-4 flex flex-col md:flex-row gap-4">
-                            <div className="flex-1 relative">
-                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <div className="p-4 space-y-4">
+                            {/* Location Input - Full Width */}
+                            <div className="relative">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-[#134e4a] w-5 h-5" />
                                 <input
                                     type="text"
                                     placeholder="City, Neighborhood, ZIP, or Address"
-                                    className="w-full h-12 pl-12 pr-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#134e4a] focus:border-transparent outline-none text-gray-900 placeholder:text-gray-400"
+                                    className="w-full h-14 pl-12 pr-4 rounded-lg border-2 border-gray-200 focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] outline-none text-gray-900 placeholder:text-gray-400 text-base"
                                 />
                             </div>
-                            <div className="w-px h-12 bg-gray-200 hidden md:block" />
-                            <div className="flex gap-2">
-                                <select className="h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] cursor-pointer">
-                                    <option>Price</option>
-                                    <option>$0 - $1,500</option>
-                                    <option>$1,500 - $2,500</option>
-                                    <option>$2,500 - $4,000</option>
-                                    <option>$4,000+</option>
-                                </select>
-                                <select className="h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] cursor-pointer">
-                                    <option>Beds</option>
-                                    <option>Studio</option>
-                                    <option>1+ Bed</option>
-                                    <option>2+ Beds</option>
-                                    <option>3+ Beds</option>
-                                </select>
+
+                            {/* Filter Controls */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex-1 grid grid-cols-2 gap-3">
+                                    <div className="relative">
+                                        <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 font-medium">Price Range</label>
+                                        <select className="w-full h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] cursor-pointer appearance-none">
+                                            <option>Any Price</option>
+                                            <option>$0 - $1,500</option>
+                                            <option>$1,500 - $2,500</option>
+                                            <option>$2,500 - $4,000</option>
+                                            <option>$4,000+</option>
+                                        </select>
+                                    </div>
+                                    <div className="relative">
+                                        <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 font-medium">Bedrooms</label>
+                                        <select className="w-full h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] cursor-pointer appearance-none">
+                                            <option>Any Beds</option>
+                                            <option>Studio</option>
+                                            <option>1+ Bed</option>
+                                            <option>2+ Beds</option>
+                                            <option>3+ Beds</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <Link
+                                    to={getSearchLink()}
+                                    className="h-12 px-8 bg-[#134e4a] hover:bg-[#0f3f3c] text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 btn-press whitespace-nowrap"
+                                >
+                                    Search Rentals
+                                </Link>
                             </div>
-                            <Link
-                                to={getSearchLink()}
-                                className="h-12 px-8 bg-[#134e4a] hover:bg-[#0f3f3c] text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
-                            >
-                                Search
-                            </Link>
                         </div>
                     )}
 
                     {/* Buy Tab Content */}
                     {activeTab === 'buy' && (
-                        <div className="p-4 flex flex-col md:flex-row gap-4">
-                            <div className="flex-1 relative">
-                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <div className="p-4 space-y-4">
+                            {/* Location Input - Full Width */}
+                            <div className="relative">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-[#134e4a] w-5 h-5" />
                                 <input
                                     type="text"
                                     placeholder="City, Neighborhood, or ZIP"
-                                    className="w-full h-12 pl-12 pr-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#134e4a] focus:border-transparent outline-none text-gray-900 placeholder:text-gray-400"
+                                    className="w-full h-14 pl-12 pr-4 rounded-lg border-2 border-gray-200 focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] outline-none text-gray-900 placeholder:text-gray-400 text-base"
                                 />
                             </div>
-                            <div className="w-px h-12 bg-gray-200 hidden md:block" />
-                            <div className="flex gap-2">
-                                <select className="h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] cursor-pointer">
-                                    <option>Price</option>
-                                    <option>Under $300k</option>
-                                    <option>$300k - $500k</option>
-                                    <option>$500k - $750k</option>
-                                    <option>$750k - $1M</option>
-                                    <option>$1M+</option>
-                                </select>
-                                <select className="h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] cursor-pointer">
-                                    <option>Type</option>
-                                    <option>House</option>
-                                    <option>Condo</option>
-                                    <option>Townhome</option>
-                                    <option>Multi-Family</option>
-                                </select>
+
+                            {/* Filter Controls */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex-1 grid grid-cols-2 gap-3">
+                                    <div className="relative">
+                                        <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 font-medium">Price Range</label>
+                                        <select className="w-full h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] cursor-pointer appearance-none">
+                                            <option>Any Price</option>
+                                            <option>Under $300k</option>
+                                            <option>$300k - $500k</option>
+                                            <option>$500k - $750k</option>
+                                            <option>$750k - $1M</option>
+                                            <option>$1M+</option>
+                                        </select>
+                                    </div>
+                                    <div className="relative">
+                                        <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 font-medium">Property Type</label>
+                                        <select className="w-full h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] cursor-pointer appearance-none">
+                                            <option>Any Type</option>
+                                            <option>House</option>
+                                            <option>Condo</option>
+                                            <option>Townhome</option>
+                                            <option>Multi-Family</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <Link
+                                    to={getSearchLink()}
+                                    className="h-12 px-8 bg-[#134e4a] hover:bg-[#0f3f3c] text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 btn-press whitespace-nowrap"
+                                >
+                                    Search Homes
+                                </Link>
                             </div>
-                            <Link
-                                to={getSearchLink()}
-                                className="h-12 px-8 bg-[#134e4a] hover:bg-[#0f3f3c] text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
-                            >
-                                Search Homes
-                            </Link>
                         </div>
                     )}
 
                     {/* Stays Tab Content */}
                     {activeTab === 'stays' && (
-                        <div className="p-4">
-                            <div className="flex flex-col md:flex-row gap-4">
-                                <div className="flex-1 relative">
-                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input
-                                        type="text"
-                                        placeholder="Where are you going?"
-                                        className="w-full h-12 pl-12 pr-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#134e4a] focus:border-transparent outline-none text-gray-900 placeholder:text-gray-400"
-                                    />
-                                </div>
-                                <div className="w-px h-12 bg-gray-200 hidden md:block" />
-                                <div className="flex gap-2">
+                        <div className="p-4 space-y-4">
+                            {/* Location Input - Full Width */}
+                            <div className="relative">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-[#134e4a] w-5 h-5" />
+                                <input
+                                    type="text"
+                                    placeholder="Where are you going? (City, neighborhood, or address)"
+                                    className="w-full h-14 pl-12 pr-4 rounded-lg border-2 border-gray-200 focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] outline-none text-gray-900 placeholder:text-gray-400 text-base"
+                                />
+                            </div>
+
+                            {/* Date & Guest Controls */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex-1 grid grid-cols-2 gap-3">
                                     <div className="relative">
+                                        <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 font-medium">Check-in</label>
                                         <input
                                             type="date"
-                                            placeholder="Check-in"
-                                            className="h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] cursor-pointer"
+                                            className="w-full h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] cursor-pointer"
                                         />
                                     </div>
                                     <div className="relative">
+                                        <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 font-medium">Check-out</label>
                                         <input
                                             type="date"
-                                            placeholder="Check-out"
-                                            className="h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] cursor-pointer"
+                                            className="w-full h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] cursor-pointer"
                                         />
                                     </div>
                                 </div>
-                                <select className="h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] cursor-pointer">
-                                    <option>Guests</option>
-                                    <option>1 Guest</option>
-                                    <option>2 Guests</option>
-                                    <option>3 Guests</option>
-                                    <option>4+ Guests</option>
-                                </select>
+                                <div className="relative sm:w-36">
+                                    <label className="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 font-medium">Guests</label>
+                                    <select className="w-full h-12 px-4 rounded-lg border border-gray-200 text-gray-700 outline-none bg-white focus:ring-2 focus:ring-[#134e4a] focus:border-[#134e4a] cursor-pointer appearance-none">
+                                        <option>1 Guest</option>
+                                        <option>2 Guests</option>
+                                        <option>3 Guests</option>
+                                        <option>4 Guests</option>
+                                        <option>5+ Guests</option>
+                                    </select>
+                                </div>
                                 <Link
                                     to={getSearchLink()}
-                                    className="h-12 px-8 bg-[#134e4a] hover:bg-[#0f3f3c] text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+                                    className="h-12 px-8 bg-[#134e4a] hover:bg-[#0f3f3c] text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 btn-press whitespace-nowrap"
                                 >
                                     Find Stays
                                 </Link>
                             </div>
-                            <div className="mt-3 flex flex-wrap gap-2">
-                                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 cursor-pointer transition-colors">Entire places</span>
-                                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 cursor-pointer transition-colors">Pet friendly</span>
-                                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 cursor-pointer transition-colors">Self check-in</span>
-                                <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-gray-200 cursor-pointer transition-colors">Superhosts only</span>
+
+                            {/* Quick Filters */}
+                            <div className="flex flex-wrap gap-2 pt-1">
+                                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-[#134e4a] hover:text-white cursor-pointer transition-colors font-medium">Entire places</span>
+                                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-[#134e4a] hover:text-white cursor-pointer transition-colors font-medium">Pet friendly</span>
+                                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-[#134e4a] hover:text-white cursor-pointer transition-colors font-medium">Self check-in</span>
+                                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600 hover:bg-[#134e4a] hover:text-white cursor-pointer transition-colors font-medium">Superhosts only</span>
                             </div>
                         </div>
                     )}
@@ -581,6 +618,13 @@ const Footer = () => (
 
 // --- Main Component ---
 export function LandingPage() {
+    const { recentPropertyIds, clearHistory, hasHistory } = useRecentlyViewed();
+
+    // Get recently viewed properties from mock data
+    const recentlyViewedProperties = recentPropertyIds
+        .map(id => MOCK_PROPERTIES.find(p => p.id === id))
+        .filter(Boolean) as typeof MOCK_PROPERTIES;
+
     return (
         <div className="min-h-screen bg-white font-sans text-gray-900">
             <style>{`
@@ -591,6 +635,15 @@ export function LandingPage() {
             <Header />
             <main className="pt-16">
                 <HeroSearch />
+
+                {/* Recently Viewed Carousel - only shows if user has history */}
+                {hasHistory && (
+                    <RecentlyViewedCarousel
+                        properties={recentlyViewedProperties}
+                        onClearHistory={clearHistory}
+                    />
+                )}
+
                 <ValueProps />
                 <FeaturedSection />
                 <LifestyleGrid />
@@ -605,7 +658,7 @@ export function LandingPage() {
                         <p className="text-xl text-emerald-100 mb-10 max-w-2xl mx-auto">
                             Connect with millions of renters searching for their next home. We make it easy to manage your listings and find great tenants.
                         </p>
-                        <button className="px-8 py-4 bg-white text-[#134e4a] text-lg font-bold rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl">
+                        <button className="px-8 py-4 bg-white text-[#134e4a] text-lg font-bold rounded-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl btn-press">
                             Add Your Listing
                         </button>
                     </div>

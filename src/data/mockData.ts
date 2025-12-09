@@ -532,4 +532,13 @@ export const MOCK_BUY_PROPERTIES: BuyProperty[] = [
     }
 ];
 
+// Manager-specific stays data with booking/revenue metrics
+export const MOCK_MANAGER_STAYS = MOCK_STAYS.map((stay, i) => ({
+    ...stay,
+    bookingsThisMonth: [4, 6, 3, 8][i],
+    revenue: ['$1,560', '$2,940', '$1,875', '$2,320'][i],
+    status: (['active', 'active', 'draft', 'active'] as const)[i],
+    upcomingCheckins: [2, 1, 0, 3][i],
+    avgOccupancy: ['78%', '92%', '45%', '85%'][i]
+}));
 

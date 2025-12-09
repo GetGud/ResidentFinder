@@ -33,7 +33,13 @@ import {
     Shield,
     Key,
     BellRing,
-    MapPin
+    MapPin,
+    Star,
+    Bed,
+    Bath,
+    Wifi,
+    Car,
+    Coffee
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Modal } from '../components/Modal';
@@ -67,6 +73,21 @@ const TENANTS = [
     { id: 3, name: 'Robert Chen', email: 'robert.c@email.com', phone: '(206) 555-0103', property: 'Azure Waterfront', unit: '1504', leaseEnd: 'Jun 30, 2025', rent: '$3,400', status: 'current', paidThisMonth: false },
     { id: 4, name: 'Maria Garcia', email: 'maria.g@email.com', phone: '(206) 555-0104', property: 'The Brickyard', unit: '201', leaseEnd: 'Feb 28, 2025', rent: '$1,650', status: 'expiring', paidThisMonth: true },
     { id: 5, name: 'Thomas Wright', email: 'thomas.w@email.com', phone: '(206) 555-0105', property: 'The Emerald Heights', unit: '8A', leaseEnd: 'Sep 1, 2025', rent: '$2,650', status: 'current', paidThisMonth: true },
+];
+
+// Stays mock data for manager
+const STAYS = [
+    { id: 1, title: 'Cozy Capitol Hill Studio', location: 'Capitol Hill, Seattle', pricePerNight: 89, rating: 4.92, reviewCount: 156, type: 'Entire place', guests: 2, beds: 1, baths: 1, status: 'active', bookingsThisMonth: 4, revenue: '$1,560', upcomingCheckins: 2, image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=100&q=80' },
+    { id: 2, title: 'Modern Downtown Loft with Views', location: 'Downtown Seattle', pricePerNight: 175, rating: 4.88, reviewCount: 89, type: 'Entire place', guests: 4, beds: 2, baths: 1, status: 'active', bookingsThisMonth: 6, revenue: '$2,940', upcomingCheckins: 1, image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=100&q=80' },
+    { id: 3, title: 'Waterfront Guest Suite', location: 'Ballard, Seattle', pricePerNight: 125, rating: 4.95, reviewCount: 234, type: 'Private room', guests: 2, beds: 1, baths: 1, status: 'draft', bookingsThisMonth: 3, revenue: '$1,875', upcomingCheckins: 0, image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=100&q=80' },
+    { id: 4, title: 'Trendy Queen Anne Apartment', location: 'Queen Anne, Seattle', pricePerNight: 145, rating: 4.78, reviewCount: 67, type: 'Entire place', guests: 3, beds: 1, baths: 1, status: 'active', bookingsThisMonth: 8, revenue: '$2,320', upcomingCheckins: 3, image: 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=100&q=80' },
+];
+
+const STAYS_STATS = [
+    { label: 'Total Stays', value: '4', change: '+1 this month', trend: 'up', icon: Home },
+    { label: 'Active Bookings', value: '8', change: '+3 this week', trend: 'up', icon: Calendar },
+    { label: 'Upcoming Check-ins', value: '6', change: 'Next 7 days', trend: 'up', icon: Clock },
+    { label: 'Stays Revenue', value: '$8.7k', change: '+$1.2k', trend: 'up', icon: BarChart3 },
 ];
 
 const NAV_ITEMS = [
@@ -281,75 +302,200 @@ const DashboardTab = ({ onAddProperty }: DashboardTabProps) => (
 
 interface PropertiesTabProps {
     onAddProperty: () => void;
+    onAddStay: () => void;
     onEditProperty?: (property: typeof PROPERTIES[0]) => void;
     onViewProperty?: (property: typeof PROPERTIES[0]) => void;
+    onEditStay?: (stay: typeof STAYS[0]) => void;
+    onViewStay?: (stay: typeof STAYS[0]) => void;
 }
 
-const PropertiesTab = ({ onAddProperty, onEditProperty, onViewProperty }: PropertiesTabProps) => (
-    <div className="space-y-6">
-        <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900">My Properties ({PROPERTIES.length})</h2>
-            <button
-                onClick={onAddProperty}
-                className="flex items-center gap-2 px-4 py-2 bg-[#134e4a] text-white font-semibold rounded-lg hover:bg-[#0f3f3c]"
-            >
-                <Plus size={18} /> Add Property
-            </button>
-        </div>
+const PropertiesTab = ({ onAddProperty, onAddStay, onEditProperty, onViewProperty, onEditStay, onViewStay }: PropertiesTabProps) => {
+    const [viewType, setViewType] = useState<'properties' | 'stays'>('properties');
 
-        <div className="grid gap-6">
-            {PROPERTIES.map((property) => (
-                <div key={property.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div className="p-6 flex flex-col md:flex-row gap-6">
-                        <img src={property.image} alt={property.name} className="w-full md:w-40 h-28 rounded-lg object-cover" />
-                        <div className="flex-1">
-                            <div className="flex justify-between items-start mb-2">
-                                <div>
-                                    <h3 className="font-bold text-lg text-gray-900">{property.name}</h3>
-                                    <p className="text-sm text-gray-500">{property.address}</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => onEditProperty?.(property)}
-                                        className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-[#f0fdf4] hover:text-[#134e4a] hover:border-[#134e4a]/30 transition-colors"
-                                        title="Edit Property"
-                                    >
-                                        <Edit size={16} />
-                                    </button>
-                                    <button
-                                        onClick={() => onViewProperty?.(property)}
-                                        className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-[#f0fdf4] hover:text-[#134e4a] hover:border-[#134e4a]/30 transition-colors"
-                                        title="View Property"
-                                    >
-                                        <Eye size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                                <div className="bg-gray-50 p-3 rounded-lg">
-                                    <p className="text-xs text-gray-500 font-medium">Total Units</p>
-                                    <p className="text-lg font-bold text-gray-900">{property.units}</p>
-                                </div>
-                                <div className="bg-green-50 p-3 rounded-lg">
-                                    <p className="text-xs text-green-600 font-medium">Occupied</p>
-                                    <p className="text-lg font-bold text-green-700">{property.occupied}</p>
-                                </div>
-                                <div className={cn("p-3 rounded-lg", property.vacant > 0 ? "bg-amber-50" : "bg-green-50")}>
-                                    <p className={cn("text-xs font-medium", property.vacant > 0 ? "text-amber-600" : "text-green-600")}>Vacant</p>
-                                    <p className={cn("text-lg font-bold", property.vacant > 0 ? "text-amber-700" : "text-green-700")}>{property.vacant}</p>
-                                </div>
-                                <div className="bg-blue-50 p-3 rounded-lg">
-                                    <p className="text-xs text-blue-600 font-medium">Monthly Revenue</p>
-                                    <p className="text-lg font-bold text-blue-700">{property.revenue}</p>
+    return (
+        <div className="space-y-6">
+            {/* Header with View Toggle */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-center gap-4">
+                    <h2 className="text-2xl font-bold text-gray-900">My Listings</h2>
+                    {/* View Toggle */}
+                    <div className="flex p-1 bg-gray-100 rounded-lg">
+                        <button
+                            onClick={() => setViewType('properties')}
+                            className={cn(
+                                "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                                viewType === 'properties'
+                                    ? "bg-white text-[#134e4a] shadow-sm"
+                                    : "text-gray-600 hover:text-gray-900"
+                            )}
+                        >
+                            <Building2 className="inline-block w-4 h-4 mr-1.5" />
+                            Properties ({PROPERTIES.length})
+                        </button>
+                        <button
+                            onClick={() => setViewType('stays')}
+                            className={cn(
+                                "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                                viewType === 'stays'
+                                    ? "bg-white text-[#134e4a] shadow-sm"
+                                    : "text-gray-600 hover:text-gray-900"
+                            )}
+                        >
+                            <Home className="inline-block w-4 h-4 mr-1.5" />
+                            Stays ({STAYS.length})
+                        </button>
+                    </div>
+                </div>
+                {viewType === 'properties' ? (
+                    <button
+                        onClick={onAddProperty}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#134e4a] text-white font-semibold rounded-lg hover:bg-[#0f3f3c] btn-press"
+                    >
+                        <Plus size={18} /> Add Property
+                    </button>
+                ) : (
+                    <button
+                        onClick={onAddStay}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#134e4a] text-white font-semibold rounded-lg hover:bg-[#0f3f3c] btn-press"
+                    >
+                        <Plus size={18} /> Add Stay
+                    </button>
+                )}
+            </div>
+
+            {/* Properties List */}
+            {viewType === 'properties' && (
+                <div className="grid gap-6">
+                    {PROPERTIES.map((property) => (
+                        <div key={property.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div className="p-6 flex flex-col md:flex-row gap-6">
+                                <img src={property.image} alt={property.name} className="w-full md:w-40 h-28 rounded-lg object-cover" />
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h3 className="font-bold text-lg text-gray-900">{property.name}</h3>
+                                            <p className="text-sm text-gray-500">{property.address}</p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => onEditProperty?.(property)}
+                                                className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-[#f0fdf4] hover:text-[#134e4a] hover:border-[#134e4a]/30 transition-colors"
+                                                title="Edit Property"
+                                            >
+                                                <Edit size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => onViewProperty?.(property)}
+                                                className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-[#f0fdf4] hover:text-[#134e4a] hover:border-[#134e4a]/30 transition-colors"
+                                                title="View Property"
+                                            >
+                                                <Eye size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <p className="text-xs text-gray-500 font-medium">Total Units</p>
+                                            <p className="text-lg font-bold text-gray-900">{property.units}</p>
+                                        </div>
+                                        <div className="bg-green-50 p-3 rounded-lg">
+                                            <p className="text-xs text-green-600 font-medium">Occupied</p>
+                                            <p className="text-lg font-bold text-green-700">{property.occupied}</p>
+                                        </div>
+                                        <div className={cn("p-3 rounded-lg", property.vacant > 0 ? "bg-amber-50" : "bg-green-50")}>
+                                            <p className={cn("text-xs font-medium", property.vacant > 0 ? "text-amber-600" : "text-green-600")}>Vacant</p>
+                                            <p className={cn("text-lg font-bold", property.vacant > 0 ? "text-amber-700" : "text-green-700")}>{property.vacant}</p>
+                                        </div>
+                                        <div className="bg-blue-50 p-3 rounded-lg">
+                                            <p className="text-xs text-blue-600 font-medium">Monthly Revenue</p>
+                                            <p className="text-lg font-bold text-blue-700">{property.revenue}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    ))}
                 </div>
-            ))}
+            )}
+
+            {/* Stays List */}
+            {viewType === 'stays' && (
+                <div className="grid gap-6">
+                    {STAYS.map((stay) => (
+                        <div key={stay.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div className="p-6 flex flex-col md:flex-row gap-6">
+                                <div className="relative">
+                                    <img src={stay.image} alt={stay.title} className="w-full md:w-40 h-28 rounded-lg object-cover" />
+                                    <span className={cn(
+                                        "absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-bold",
+                                        stay.status === 'active' ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                                    )}>
+                                        {stay.status === 'active' ? 'Active' : 'Draft'}
+                                    </span>
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h3 className="font-bold text-lg text-gray-900">{stay.title}</h3>
+                                            <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                <MapPin size={14} /> {stay.location}
+                                            </p>
+                                            <div className="flex items-center gap-3 mt-1 text-sm text-gray-600">
+                                                <span className="flex items-center gap-1">
+                                                    <Star size={14} className="text-amber-500 fill-amber-500" />
+                                                    {stay.rating} ({stay.reviewCount})
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Users size={14} /> {stay.guests} guests
+                                                </span>
+                                                <span>{stay.type}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => onEditStay?.(stay)}
+                                                className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-[#f0fdf4] hover:text-[#134e4a] hover:border-[#134e4a]/30 transition-colors"
+                                                title="Edit Stay"
+                                            >
+                                                <Edit size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => onViewStay?.(stay)}
+                                                className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-[#f0fdf4] hover:text-[#134e4a] hover:border-[#134e4a]/30 transition-colors"
+                                                title="View Stay"
+                                            >
+                                                <Eye size={16} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <p className="text-xs text-gray-500 font-medium">Price/Night</p>
+                                            <p className="text-lg font-bold text-gray-900">${stay.pricePerNight}</p>
+                                        </div>
+                                        <div className="bg-purple-50 p-3 rounded-lg">
+                                            <p className="text-xs text-purple-600 font-medium">Bookings</p>
+                                            <p className="text-lg font-bold text-purple-700">{stay.bookingsThisMonth}</p>
+                                        </div>
+                                        <div className="bg-amber-50 p-3 rounded-lg">
+                                            <p className="text-xs text-amber-600 font-medium">Check-ins</p>
+                                            <p className="text-lg font-bold text-amber-700">{stay.upcomingCheckins}</p>
+                                        </div>
+                                        <div className="bg-blue-50 p-3 rounded-lg">
+                                            <p className="text-xs text-blue-600 font-medium">Revenue</p>
+                                            <p className="text-lg font-bold text-blue-700">{stay.revenue}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
+
 
 const TenantsTab = () => {
     const [propertyFilter, setPropertyFilter] = useState('all');
@@ -823,11 +969,19 @@ export function ManagerDashboardPage() {
     const [addPropertyModal, setAddPropertyModal] = useState(false);
     const [editPropertyModal, setEditPropertyModal] = useState<typeof PROPERTIES[0] | null>(null);
     const [viewPropertyModal, setViewPropertyModal] = useState<typeof PROPERTIES[0] | null>(null);
+    // Stay modals
+    const [addStayModal, setAddStayModal] = useState(false);
+    const [editStayModal, setEditStayModal] = useState<typeof STAYS[0] | null>(null);
+    const [viewStayModal, setViewStayModal] = useState<typeof STAYS[0] | null>(null);
     const [inviteModal, setInviteModal] = useState(false);
     const [successToast, setSuccessToast] = useState<string | null>(null);
 
     const handleAddProperty = () => {
         setAddPropertyModal(true);
+    };
+
+    const handleAddStay = () => {
+        setAddStayModal(true);
     };
 
     const confirmAddProperty = () => {
@@ -836,10 +990,25 @@ export function ManagerDashboardPage() {
         setTimeout(() => setSuccessToast(null), 3000);
     };
 
+    const confirmAddStay = () => {
+        setSuccessToast('Stay listing added successfully!');
+        setAddStayModal(false);
+        setTimeout(() => setSuccessToast(null), 3000);
+    };
+
     const renderTabContent = () => {
         switch (activeItem) {
             case 'dashboard': return <DashboardTab onAddProperty={handleAddProperty} />;
-            case 'properties': return <PropertiesTab onAddProperty={handleAddProperty} onEditProperty={(p) => setEditPropertyModal(p)} onViewProperty={(p) => setViewPropertyModal(p)} />;
+            case 'properties': return (
+                <PropertiesTab
+                    onAddProperty={handleAddProperty}
+                    onAddStay={handleAddStay}
+                    onEditProperty={(p) => setEditPropertyModal(p)}
+                    onViewProperty={(p) => setViewPropertyModal(p)}
+                    onEditStay={(s) => setEditStayModal(s)}
+                    onViewStay={(s) => setViewStayModal(s)}
+                />
+            );
             case 'tenants': return <TenantsTab />;
             case 'leads': return <LeadsTab />;
             case 'analytics': return <AnalyticsTab />;
@@ -1272,6 +1441,275 @@ export function ManagerDashboardPage() {
                         </button>
                     </div>
                 </div>
+            </Modal>
+
+            {/* Add Stay Modal */}
+            <Modal
+                isOpen={addStayModal}
+                onClose={() => setAddStayModal(false)}
+                title="Add New Stay Listing"
+                size="lg"
+            >
+                <div className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Listing Title</label>
+                            <input
+                                type="text"
+                                placeholder="e.g., Cozy Downtown Studio with Views"
+                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
+                            />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <input
+                                    type="text"
+                                    placeholder="Neighborhood, City"
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Price per Night</label>
+                            <div className="relative">
+                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <input
+                                    type="number"
+                                    placeholder="e.g., 125"
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+                            <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]">
+                                <option>Entire place</option>
+                                <option>Private room</option>
+                                <option>Shared room</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Max Guests</label>
+                            <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]">
+                                <option>1 Guest</option>
+                                <option>2 Guests</option>
+                                <option>3 Guests</option>
+                                <option>4 Guests</option>
+                                <option>5+ Guests</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                            <select className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]">
+                                <option>Studio</option>
+                                <option>1 Bedroom</option>
+                                <option>2 Bedrooms</option>
+                                <option>3 Bedrooms</option>
+                                <option>4+ Bedrooms</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {['WiFi', 'Kitchen', 'Washer/Dryer', 'Free Parking', 'Air Conditioning', 'Self Check-in', 'Pet Friendly', 'Pool', 'Hot Tub'].map((amenity) => (
+                                <label key={amenity} className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                    <input type="checkbox" className="w-4 h-4 text-[#134e4a] rounded focus:ring-[#134e4a]" />
+                                    <span className="text-sm text-gray-700">{amenity}</span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Listing Image</label>
+                        <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-[#134e4a]/50 transition-colors cursor-pointer">
+                            <Home className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
+                            <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3 justify-end pt-4 border-t border-gray-100">
+                        <button
+                            onClick={() => setAddStayModal(false)}
+                            className="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={confirmAddStay}
+                            className="px-6 py-2 bg-[#134e4a] text-white rounded-lg font-bold hover:bg-[#0f3f3c]"
+                        >
+                            Add Stay Listing
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Edit Stay Modal */}
+            <Modal
+                isOpen={!!editStayModal}
+                onClose={() => setEditStayModal(null)}
+                title={`Edit: ${editStayModal?.title || ''}`}
+                size="lg"
+            >
+                {editStayModal && (
+                    <div className="space-y-4">
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Listing Title</label>
+                                <input
+                                    type="text"
+                                    defaultValue={editStayModal.title}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
+                                />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                <input
+                                    type="text"
+                                    defaultValue={editStayModal.location}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Price per Night</label>
+                                <input
+                                    type="number"
+                                    defaultValue={editStayModal.pricePerNight}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select
+                                    defaultValue={editStayModal.status}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
+                                >
+                                    <option value="active">Active</option>
+                                    <option value="draft">Draft</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Max Guests</label>
+                                <input
+                                    type="number"
+                                    defaultValue={editStayModal.guests}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Bedrooms</label>
+                                <input
+                                    type="number"
+                                    defaultValue={editStayModal.beds}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-3 justify-end pt-4 border-t border-gray-100">
+                            <button
+                                onClick={() => setEditStayModal(null)}
+                                className="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setSuccessToast('Stay listing updated successfully!');
+                                    setEditStayModal(null);
+                                    setTimeout(() => setSuccessToast(null), 3000);
+                                }}
+                                className="px-6 py-2 bg-[#134e4a] text-white rounded-lg font-bold hover:bg-[#0f3f3c]"
+                            >
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </Modal>
+
+            {/* View Stay Modal */}
+            <Modal
+                isOpen={!!viewStayModal}
+                onClose={() => setViewStayModal(null)}
+                title={viewStayModal?.title || 'Stay Details'}
+                size="lg"
+            >
+                {viewStayModal && (
+                    <div className="space-y-6">
+                        <div className="relative">
+                            <img
+                                src={viewStayModal.image}
+                                alt={viewStayModal.title}
+                                className="w-full h-48 object-cover rounded-lg"
+                            />
+                            <span className={cn(
+                                "absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-bold",
+                                viewStayModal.status === 'active' ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                            )}>
+                                {viewStayModal.status === 'active' ? 'Active' : 'Draft'}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                                <MapPin size={16} /> {viewStayModal.location}
+                            </span>
+                            <span className="flex items-center gap-1">
+                                <Star size={16} className="text-amber-500 fill-amber-500" />
+                                {viewStayModal.rating} ({viewStayModal.reviewCount} reviews)
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-500 mb-1">Price/Night</p>
+                                <p className="text-2xl font-bold text-gray-900">${viewStayModal.pricePerNight}</p>
+                            </div>
+                            <div className="p-4 bg-purple-50 rounded-lg">
+                                <p className="text-sm text-purple-600 mb-1">Bookings This Month</p>
+                                <p className="text-2xl font-bold text-purple-700">{viewStayModal.bookingsThisMonth}</p>
+                            </div>
+                            <div className="p-4 bg-amber-50 rounded-lg">
+                                <p className="text-sm text-amber-600 mb-1">Upcoming Check-ins</p>
+                                <p className="text-2xl font-bold text-amber-700">{viewStayModal.upcomingCheckins}</p>
+                            </div>
+                            <div className="p-4 bg-blue-50 rounded-lg">
+                                <p className="text-sm text-blue-600 mb-1">Revenue</p>
+                                <p className="text-2xl font-bold text-blue-700">{viewStayModal.revenue}</p>
+                            </div>
+                        </div>
+                        <div className="border-t border-gray-100 pt-4">
+                            <p className="text-sm text-gray-500 mb-2">Property Details</p>
+                            <div className="flex items-center gap-4 text-gray-700">
+                                <span className="flex items-center gap-1"><Users size={16} /> {viewStayModal.guests} guests</span>
+                                <span className="flex items-center gap-1"><Bed size={16} /> {viewStayModal.beds} bed</span>
+                                <span className="flex items-center gap-1"><Bath size={16} /> {viewStayModal.baths} bath</span>
+                                <span className="text-sm bg-gray-100 px-2 py-1 rounded">{viewStayModal.type}</span>
+                            </div>
+                        </div>
+                        <div className="flex gap-3 justify-end pt-4 border-t border-gray-100">
+                            <button
+                                onClick={() => setViewStayModal(null)}
+                                className="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50"
+                            >
+                                Close
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setViewStayModal(null);
+                                    setEditStayModal(viewStayModal);
+                                }}
+                                className="px-6 py-2 bg-[#134e4a] text-white rounded-lg font-bold hover:bg-[#0f3f3c] flex items-center gap-2"
+                            >
+                                <Edit size={16} /> Edit Listing
+                            </button>
+                        </div>
+                    </div>
+                )}
             </Modal>
 
             {/* Success Toast */}

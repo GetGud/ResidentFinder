@@ -170,7 +170,7 @@ export const PropertyCard = ({ property, onMouseEnter, onMouseLeave, onClick }: 
                                 }
                             }}
                             className={cn(
-                                "p-2 rounded-full transition-colors",
+                                "p-2 rounded-full transition-colors btn-press",
                                 inCompare
                                     ? "bg-[#134e4a] text-white"
                                     : "text-gray-400 hover:text-[#134e4a] hover:bg-green-50"
@@ -186,7 +186,7 @@ export const PropertyCard = ({ property, onMouseEnter, onMouseLeave, onClick }: 
                                 e.stopPropagation();
                                 setShowShareModal(true);
                             }}
-                            className="p-2 text-gray-400 hover:text-[#134e4a] hover:bg-green-50 rounded-full transition-colors"
+                            className="p-2 text-gray-400 hover:text-[#134e4a] hover:bg-green-50 rounded-full transition-colors btn-press"
                             title="Share property"
                         >
                             <Share2 className="w-4 h-4" />
@@ -198,7 +198,7 @@ export const PropertyCard = ({ property, onMouseEnter, onMouseLeave, onClick }: 
                                 e.stopPropagation();
                                 setShowTourModal(true);
                             }}
-                            className="px-3 py-1.5 bg-white border border-[#134e4a] text-[#134e4a] text-xs font-semibold rounded-md hover:bg-[#134e4a]/5 transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 bg-white border border-[#134e4a] text-[#134e4a] text-xs font-semibold rounded-md hover:bg-[#134e4a]/5 transition-colors flex items-center gap-1 btn-press"
                         >
                             <Calendar className="w-3.5 h-3.5" />
                             Tour
@@ -208,7 +208,7 @@ export const PropertyCard = ({ property, onMouseEnter, onMouseLeave, onClick }: 
                         <Link
                             to={`/property/${property.id}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="px-3 py-1.5 bg-[#134e4a] text-white text-xs font-semibold rounded-md hover:bg-[#0f3f3c] transition-colors shadow-sm"
+                            className="px-3 py-1.5 bg-[#134e4a] text-white text-xs font-semibold rounded-md hover:bg-[#0f3f3c] transition-colors shadow-sm btn-press"
                         >
                             Details
                         </Link>

@@ -31,6 +31,7 @@ import { cn } from '../lib/utils';
 import { MOCK_PROPERTIES } from '../data/mockData';
 import { FloorPlan } from '../types';
 import { TourSchedulerModal } from '../components/TourSchedulerModal';
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
 
 const SECTIONS = [
     { id: 'pricing', label: 'Pricing' },
@@ -46,9 +47,17 @@ export function PropertyDetailsPage() {
     const [expandedFloorPlan, setExpandedFloorPlan] = useState<string | null>(null);
     const [showTourModal, setShowTourModal] = useState(false);
     const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+    const { addViewed } = useRecentlyViewed();
 
     // Find property or use first one as fallback
     const property = MOCK_PROPERTIES.find(p => p.id === id) || MOCK_PROPERTIES[0];
+
+    // Track this property as recently viewed
+    useEffect(() => {
+        if (property?.id) {
+            addViewed(property.id);
+        }
+    }, [property?.id, addViewed]);
 
     const images = property.images.length > 0 ? [
         ...property.images,

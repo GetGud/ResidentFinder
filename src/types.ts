@@ -20,6 +20,7 @@ export interface Property {
   tags: string[];
   petsAllowed: boolean; // For filtering
   coordinates: { x: number; y: number }; // For map simulation
+  virtualTourUrl?: string; // For 3D virtual tour integration
   // Extended details
   floorPlans?: FloorPlan[];
   fees?: Fee[];

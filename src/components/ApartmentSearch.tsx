@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Maximize, CheckCircle2, ChevronDown } from 'lucide-react';
 import { Header, FilterState } from './Header';
 import { PropertyCard } from './PropertyCard';
@@ -7,10 +7,12 @@ import { PropertyDetailsModal } from './PropertyDetailsModal';
 import { PropertyCardSkeleton } from './Skeleton';
 import { MOCK_PROPERTIES } from '../data/mockData';
 import { Property } from '../types';
+import { cn } from '../lib/utils';
 
 export function ApartmentSearch() {
     const [searchQuery, setSearchQuery] = useState('');
     const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
+    const [mapHoveredPropertyId, setMapHoveredPropertyId] = useState<string | null>(null);
     const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [filters, setFilters] = useState<FilterState>({
@@ -18,6 +20,10 @@ export function ApartmentSearch() {
         beds: null,
         petsAllowed: null
     });
+    const propertyRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+    // Combined hover state from either list or map
+    const activeHoveredId = hoveredPropertyId || mapHoveredPropertyId;
 
     // Simulate initial loading
     useEffect(() => {
@@ -57,6 +63,14 @@ export function ApartmentSearch() {
             return true;
         });
     }, [searchQuery, filters]);
+
+    // Auto-scroll to card when map marker is hovered
+    const scrollToCard = useCallback((propertyId: string) => {
+        const element = propertyRefs.current[propertyId];
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, []);
 
     return (
         <div className="flex flex-col h-screen bg-white font-sans text-gray-900">
@@ -108,13 +122,21 @@ export function ApartmentSearch() {
                         ) : (
                             <>
                                 {filteredProperties.map((property) => (
-                                    <PropertyCard
+                                    <div
                                         key={property.id}
-                                        property={property}
-                                        onMouseEnter={() => setHoveredPropertyId(property.id)}
-                                        onMouseLeave={() => setHoveredPropertyId(null)}
-                                        onClick={() => setSelectedProperty(property)}
-                                    />
+                                        ref={(el) => propertyRefs.current[property.id] = el}
+                                        className={cn(
+                                            "transition-all duration-200 rounded-xl",
+                                            mapHoveredPropertyId === property.id && "hover-synced"
+                                        )}
+                                    >
+                                        <PropertyCard
+                                            property={property}
+                                            onMouseEnter={() => setHoveredPropertyId(property.id)}
+                                            onMouseLeave={() => setHoveredPropertyId(null)}
+                                            onClick={() => setSelectedProperty(property)}
+                                        />
+                                    </div>
                                 ))}
 
                                 {filteredProperties.length === 0 && (
@@ -215,8 +237,16 @@ export function ApartmentSearch() {
                             x={p.coordinates.x}
                             y={p.coordinates.y}
                             price={p.price}
-                            isHovered={hoveredPropertyId === p.id}
+                            isHovered={activeHoveredId === p.id}
+                            isNew={p.isNew}
+                            imageUrl={p.images[0]}
+                            address={p.address}
                             onClick={() => setSelectedProperty(p)}
+                            onHoverStart={() => {
+                                setMapHoveredPropertyId(p.id);
+                                scrollToCard(p.id);
+                            }}
+                            onHoverEnd={() => setMapHoveredPropertyId(null)}
                         />
                     ))}
                 </div>
