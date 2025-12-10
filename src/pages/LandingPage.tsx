@@ -31,7 +31,7 @@ const Header = () => {
     return (
         <>
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div className="max-w-[1920px] mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-8">
                         {/* Logo */}
                         <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2">
