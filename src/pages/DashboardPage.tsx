@@ -35,6 +35,8 @@ import { cn } from '../lib/utils';
 import { MOCK_SAVED_PROPERTIES, MOCK_TOURS, MOCK_APPLICATIONS, MOCK_MESSAGES } from '../data/mockData';
 import { Modal, ConfirmDialog } from '../components/Modal';
 import { Tour } from '../types';
+import { useAuth } from '../context/AuthContext';
+import { RoleSwitcher } from '../components/RoleSwitcher';
 
 // --- Types & Mock Data ---
 
@@ -213,13 +215,6 @@ const TopNavigation = ({ activeTab, setActiveTab }: { activeTab: string, setActi
                                         className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#f0fdf4] hover:text-[#134e4a] transition-colors"
                                     >
                                         Find Apartments
-                                    </Link>
-                                    <Link
-                                        to="/manager"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#f0fdf4] hover:text-[#134e4a] transition-colors"
-                                    >
-                                        Manage Rentals
                                     </Link>
                                 </div>
                             </nav>

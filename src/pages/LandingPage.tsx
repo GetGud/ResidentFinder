@@ -16,6 +16,33 @@ import { cn } from '../lib/utils';
 import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
 import { RecentlyViewedCarousel } from '../components/RecentlyViewedCarousel';
 import { MOCK_PROPERTIES } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
+import { RoleSwitcher } from '../components/RoleSwitcher';
+
+// --- Role-Based Navigation Links ---
+const LandingNavLinks = () => {
+    const { user, isAuthenticated } = useAuth();
+    const isManager = user?.role === 'manager';
+    const hasBothRoles = user?.hasManagerRole;
+
+    return (
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+            <Link to="/search" className="hover:text-[#134e4a] transition-colors">Find Apartments</Link>
+            {isAuthenticated ? (
+                <>
+                    {hasBothRoles && <RoleSwitcher compact />}
+                    {isManager ? (
+                        <Link to="/manager" className="hover:text-[#134e4a] transition-colors">Manager Dashboard</Link>
+                    ) : (
+                        <Link to="/dashboard" className="hover:text-[#134e4a] transition-colors">My Dashboard</Link>
+                    )}
+                </>
+            ) : (
+                <Link to="/manager" className="hover:text-[#134e4a] transition-colors">Manage Rentals</Link>
+            )}
+        </nav>
+    );
+};
 
 // --- Header Component with Mobile Menu ---
 const Header = () => {
@@ -44,96 +71,161 @@ const Header = () => {
                         </Link>
 
                         {/* Nav Links - Desktop */}
-                        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-                            <Link to="/search" className="hover:text-[#134e4a] transition-colors">Find Apartments</Link>
-                            <Link to="/manager" className="hover:text-[#134e4a] transition-colors">Manage Rentals</Link>
-                        </nav>
+                        <LandingNavLinks />
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <Link to="/auth" className="text-sm font-semibold text-gray-600 hover:text-[#134e4a] hidden sm:block">
-                            Sign Up
-                        </Link>
-                        <Link to="/auth" className="text-sm font-semibold text-[#134e4a] border border-[#134e4a] px-3 py-1.5 sm:px-4 sm:py-2 rounded-md hover:bg-[#134e4a]/5 transition-colors">
-                            Sign In
-                        </Link>
-                        <button
-                            onClick={() => setMobileMenuOpen(true)}
-                            className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
-                        >
-                            <Menu className="w-6 h-6" />
-                        </button>
-                    </div>
+                    <LandingAuthButtons onMenuOpen={() => setMobileMenuOpen(true)} />
                 </div>
             </header>
 
             {/* Mobile Menu Overlay */}
             <AnimatePresence>
                 {mobileMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[60] md:hidden"
-                    >
-                        <div className="absolute inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
-                        <motion.div
-                            initial={{ x: '100%' }}
-                            animate={{ x: 0 }}
-                            exit={{ x: '100%' }}
-                            transition={{ type: 'tween', duration: 0.3 }}
-                            className="absolute right-0 top-0 h-full w-72 bg-white shadow-xl"
-                        >
-                            <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                                <span className="font-bold text-[#134e4a] text-lg">Menu</span>
-                                <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <nav className="p-4 space-y-2">
-                                <Link
-                                    to="/search"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#f0fdf4] hover:text-[#134e4a] transition-colors"
-                                >
-                                    Find Apartments
-                                </Link>
-                                <Link
-                                    to="/manager"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#f0fdf4] hover:text-[#134e4a] transition-colors"
-                                >
-                                    Manage Rentals
-                                </Link>
-                                <Link
-                                    to="/dashboard"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#f0fdf4] hover:text-[#134e4a] transition-colors"
-                                >
-                                    Dashboard
-                                </Link>
-                                <div className="pt-4 border-t border-gray-100 mt-4 space-y-2">
-                                    <Link
-                                        to="/auth"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block px-4 py-3 rounded-lg bg-[#134e4a] text-white font-semibold text-center"
-                                    >
-                                        Sign In
-                                    </Link>
-                                    <Link
-                                        to="/auth"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block px-4 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium text-center hover:bg-gray-50"
-                                    >
-                                        Create Account
-                                    </Link>
-                                </div>
-                            </nav>
-                        </motion.div>
-                    </motion.div>
+                    <LandingMobileMenu onClose={() => setMobileMenuOpen(false)} />
                 )}
             </AnimatePresence>
         </>
+    );
+};
+
+// --- Auth Buttons for Landing Page Header ---
+const LandingAuthButtons = ({ onMenuOpen }: { onMenuOpen: () => void }) => {
+    const { user, isAuthenticated, logout } = useAuth();
+
+    return (
+        <div className="flex items-center gap-3">
+            {isAuthenticated ? (
+                <button
+                    onClick={() => logout()}
+                    className="flex items-center gap-2 text-sm font-semibold text-[#134e4a] border border-[#134e4a] px-3 py-1.5 sm:px-4 sm:py-2 rounded-md hover:bg-[#134e4a]/5 transition-colors"
+                >
+                    <span className="w-6 h-6 rounded-full bg-[#134e4a] text-white flex items-center justify-center text-xs font-bold">
+                        {user?.initials}
+                    </span>
+                    <span className="hidden sm:inline">Sign Out</span>
+                </button>
+            ) : (
+                <>
+                    <Link to="/auth" className="text-sm font-semibold text-gray-600 hover:text-[#134e4a] hidden sm:block">
+                        Sign Up
+                    </Link>
+                    <Link to="/auth" className="text-sm font-semibold text-[#134e4a] border border-[#134e4a] px-3 py-1.5 sm:px-4 sm:py-2 rounded-md hover:bg-[#134e4a]/5 transition-colors">
+                        Sign In
+                    </Link>
+                </>
+            )}
+            <button
+                onClick={onMenuOpen}
+                className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+            >
+                <Menu className="w-6 h-6" />
+            </button>
+        </div>
+    );
+};
+
+// --- Mobile Menu for Landing Page ---
+const LandingMobileMenu = ({ onClose }: { onClose: () => void }) => {
+    const { user, isAuthenticated, logout } = useAuth();
+    const isManager = user?.role === 'manager';
+    const hasBothRoles = user?.hasManagerRole;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] md:hidden"
+        >
+            <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+            <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'tween', duration: 0.3 }}
+                className="absolute right-0 top-0 h-full w-72 bg-white shadow-xl"
+            >
+                <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                    <span className="font-bold text-[#134e4a] text-lg">Menu</span>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+                        <X size={20} />
+                    </button>
+                </div>
+                <nav className="p-4 space-y-2">
+                    {/* Role Switcher for dual-role users */}
+                    {hasBothRoles && (
+                        <div className="pb-3 mb-3 border-b border-gray-100">
+                            <RoleSwitcher className="w-full" />
+                        </div>
+                    )}
+
+                    <Link
+                        to="/search"
+                        onClick={onClose}
+                        className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#f0fdf4] hover:text-[#134e4a] transition-colors"
+                    >
+                        Find Apartments
+                    </Link>
+
+                    {/* Role-based dashboard link */}
+                    {isAuthenticated ? (
+                        isManager ? (
+                            <Link
+                                to="/manager"
+                                onClick={onClose}
+                                className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#f0fdf4] hover:text-[#134e4a] transition-colors"
+                            >
+                                Manager Dashboard
+                            </Link>
+                        ) : (
+                            <Link
+                                to="/dashboard"
+                                onClick={onClose}
+                                className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#f0fdf4] hover:text-[#134e4a] transition-colors"
+                            >
+                                My Dashboard
+                            </Link>
+                        )
+                    ) : (
+                        <Link
+                            to="/manager"
+                            onClick={onClose}
+                            className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-[#f0fdf4] hover:text-[#134e4a] transition-colors"
+                        >
+                            Manage Rentals
+                        </Link>
+                    )}
+
+                    <div className="pt-4 border-t border-gray-100 mt-4 space-y-2">
+                        {isAuthenticated ? (
+                            <button
+                                onClick={() => { logout(); onClose(); }}
+                                className="w-full px-4 py-3 rounded-lg bg-[#134e4a] text-white font-semibold text-center"
+                            >
+                                Sign Out
+                            </button>
+                        ) : (
+                            <>
+                                <Link
+                                    to="/auth"
+                                    onClick={onClose}
+                                    className="block px-4 py-3 rounded-lg bg-[#134e4a] text-white font-semibold text-center"
+                                >
+                                    Sign In
+                                </Link>
+                                <Link
+                                    to="/auth"
+                                    onClick={onClose}
+                                    className="block px-4 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium text-center hover:bg-gray-50"
+                                >
+                                    Create Account
+                                </Link>
+                            </>
+                        )}
+                    </div>
+                </nav>
+            </motion.div>
+        </motion.div>
     );
 };
 

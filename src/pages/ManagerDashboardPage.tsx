@@ -218,18 +218,9 @@ interface DashboardTabProps {
 const DashboardTab = ({ onAddProperty }: DashboardTabProps) => (
     <div className="space-y-8">
         {/* Welcome Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Property Manager Dashboard</h1>
-                <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your properties.</p>
-            </div>
-            <button
-                onClick={onAddProperty}
-                className="flex items-center gap-2 px-4 py-2 bg-[#134e4a] text-white font-semibold rounded-lg hover:bg-[#0f3f3c] transition-colors shadow-sm"
-            >
-                <Plus size={18} />
-                Add Property
-            </button>
+        <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Property Manager Dashboard</h1>
+            <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your properties.</p>
         </div>
 
         {/* Stats Grid */}

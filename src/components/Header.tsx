@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Filter, ChevronDown, X, Menu, Search } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useAuth } from '../context/AuthContext';
+import { RoleSwitcher } from './RoleSwitcher';
 
 export interface FilterState {
     priceRange: [number, number] | null;
@@ -30,6 +32,148 @@ const BEDS_OPTIONS = [
     { label: '2+ Beds', value: 2 },
     { label: '3+ Beds', value: 3 },
 ];
+
+// Role-based navigation actions component
+const NavActions = () => {
+    const { user, isAuthenticated, logout } = useAuth();
+
+    if (!isAuthenticated || !user) {
+        // Not authenticated - show sign in only
+        return (
+            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+                <Link to="/auth" className="text-sm font-semibold text-[#134e4a] border border-[#134e4a] px-3 py-1.5 sm:px-4 sm:py-2 rounded-md hover:bg-[#134e4a]/5 transition-colors">
+                    Sign In
+                </Link>
+            </div>
+        );
+    }
+
+    // Authenticated user - show role-based nav
+    const isManager = user.role === 'manager';
+    const hasBothRoles = user.hasManagerRole;
+
+    return (
+        <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+            {/* Role Switcher for dual-role users */}
+            {hasBothRoles && (
+                <RoleSwitcher compact className="hidden md:flex" />
+            )}
+
+            {/* Role-specific dashboard link */}
+            {isManager ? (
+                <Link to="/manager" className="text-sm font-semibold text-gray-600 hover:text-[#134e4a] hidden lg:block">
+                    Manager Dashboard
+                </Link>
+            ) : (
+                <Link to="/dashboard" className="text-sm font-semibold text-gray-600 hover:text-[#134e4a] hidden lg:block">
+                    My Dashboard
+                </Link>
+            )}
+
+            {/* User menu button */}
+            <button
+                onClick={() => logout()}
+                className="flex items-center gap-2 text-sm font-semibold text-[#134e4a] border border-[#134e4a] px-3 py-1.5 sm:px-4 sm:py-2 rounded-md hover:bg-[#134e4a]/5 transition-colors"
+            >
+                <span className="w-6 h-6 rounded-full bg-[#134e4a] text-white flex items-center justify-center text-xs font-bold">
+                    {user.initials}
+                </span>
+                <span className="hidden sm:inline">Sign Out</span>
+            </button>
+        </div>
+    );
+};
+
+// Mobile navigation menu with role-based links
+const MobileNavMenu = ({ onClose }: { onClose: () => void }) => {
+    const { user, isAuthenticated, logout } = useAuth();
+    const isManager = user?.role === 'manager';
+    const hasBothRoles = user?.hasManagerRole;
+
+    return (
+        <div className="fixed inset-0 z-[60] md:hidden">
+            <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+            <div className="absolute left-0 top-0 h-full w-72 bg-white shadow-xl">
+                <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                    <Link to="/" className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">R</span>
+                        </div>
+                        <span className="text-lg font-bold text-[#134e4a]">ResidentFinder</span>
+                    </Link>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+                        <X size={20} />
+                    </button>
+                </div>
+                <nav className="p-4 space-y-2">
+                    {/* Role Switcher for dual-role users */}
+                    {hasBothRoles && (
+                        <div className="pb-3 mb-3 border-b border-gray-100">
+                            <RoleSwitcher className="w-full" />
+                        </div>
+                    )}
+
+                    <Link
+                        to="/search"
+                        onClick={onClose}
+                        className="block px-4 py-3 rounded-lg text-gray-700 font-medium bg-[#f0fdf4] text-[#134e4a]"
+                    >
+                        Find Apartments
+                    </Link>
+
+                    {/* Role-based dashboard link */}
+                    {isAuthenticated && (
+                        isManager ? (
+                            <Link
+                                to="/manager"
+                                onClick={onClose}
+                                className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
+                            >
+                                Manager Dashboard
+                            </Link>
+                        ) : (
+                            <Link
+                                to="/dashboard"
+                                onClick={onClose}
+                                className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
+                            >
+                                My Dashboard
+                            </Link>
+                        )
+                    )}
+
+                    <div className="pt-4 border-t border-gray-100 mt-4 space-y-2">
+                        {isAuthenticated ? (
+                            <button
+                                onClick={() => { logout(); onClose(); }}
+                                className="w-full px-4 py-3 rounded-lg bg-[#134e4a] text-white font-semibold text-center"
+                            >
+                                Sign Out
+                            </button>
+                        ) : (
+                            <>
+                                <Link
+                                    to="/auth"
+                                    onClick={onClose}
+                                    className="block px-4 py-3 rounded-lg bg-[#134e4a] text-white font-semibold text-center"
+                                >
+                                    Sign In
+                                </Link>
+                                <Link
+                                    to="/auth"
+                                    onClick={onClose}
+                                    className="block px-4 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium text-center hover:bg-gray-50"
+                                >
+                                    Create Account
+                                </Link>
+                            </>
+                        )}
+                    </div>
+                </nav>
+            </div>
+        </div>
+    );
+};
 
 export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -118,17 +262,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                     </div>
 
                     {/* Nav Actions */}
-                    <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-                        <Link to="/dashboard" className="text-sm font-semibold text-gray-600 hover:text-[#134e4a] hidden lg:block">
-                            Dashboard
-                        </Link>
-                        <Link to="/manager" className="text-sm font-semibold text-gray-600 hover:text-[#134e4a] hidden lg:block">
-                            Manage Rentals
-                        </Link>
-                        <Link to="/auth" className="text-sm font-semibold text-[#134e4a] border border-[#134e4a] px-3 py-1.5 sm:px-4 sm:py-2 rounded-md hover:bg-[#134e4a]/5 transition-colors">
-                            Sign In
-                        </Link>
-                    </div>
+                    <NavActions />
                 </div>
 
                 {/* Mobile Search Bar */}
@@ -247,61 +381,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
 
             {/* Mobile Menu Overlay */}
             {mobileMenuOpen && (
-                <div className="fixed inset-0 z-[60] md:hidden">
-                    <div className="absolute inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
-                    <div className="absolute left-0 top-0 h-full w-72 bg-white shadow-xl">
-                        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                            <Link to="/" className="flex items-center gap-2">
-                                <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
-                                    <span className="text-white font-bold text-lg">R</span>
-                                </div>
-                                <span className="text-lg font-bold text-[#134e4a]">ResidentFinder</span>
-                            </Link>
-                            <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <nav className="p-4 space-y-2">
-                            <Link
-                                to="/search"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-lg text-gray-700 font-medium bg-[#f0fdf4] text-[#134e4a]"
-                            >
-                                Find Apartments
-                            </Link>
-                            <Link
-                                to="/dashboard"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
-                            >
-                                Dashboard
-                            </Link>
-                            <Link
-                                to="/manager"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
-                            >
-                                Manage Rentals
-                            </Link>
-                            <div className="pt-4 border-t border-gray-100 mt-4 space-y-2">
-                                <Link
-                                    to="/auth"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-3 rounded-lg bg-[#134e4a] text-white font-semibold text-center"
-                                >
-                                    Sign In
-                                </Link>
-                                <Link
-                                    to="/auth"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium text-center hover:bg-gray-50"
-                                >
-                                    Create Account
-                                </Link>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
+                <MobileNavMenu onClose={() => setMobileMenuOpen(false)} />
             )}
         </>
     );
