@@ -114,7 +114,7 @@ export function PropertyDetailsPage() {
 
             {/* --- Sticky Header --- */}
             <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                <div className="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center text-sm text-slate-500 space-x-4">
                         {/* Logo */}
                         <Link to="/" className="flex items-center gap-2 flex-shrink-0">
@@ -160,7 +160,7 @@ export function PropertyDetailsPage() {
 
             {/* --- Sticky Anchor Navigation --- */}
             <nav className="sticky top-16 z-40 bg-white border-b border-slate-100 shadow-sm">
-                <div className="max-w-7xl mx-auto px-6">
+                <div className="max-w-[1920px] mx-auto px-6">
                     <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                         {SECTIONS.map((section) => (
                             <button
