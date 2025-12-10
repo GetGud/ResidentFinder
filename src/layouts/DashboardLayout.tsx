@@ -54,7 +54,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Top Navigation */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
                 {/* Top Bar: Logo & Utilities */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-8">
                         {/* Logo */}
                         <Link to="/" className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
                 {/* Secondary Bar: Navigation Tabs */}
                 <div className="border-t border-gray-100 bg-white">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
                         <nav className="flex items-center gap-1 overflow-x-auto hide-scrollbar -mb-px">
                             {NAV_ITEMS.map((item) => (
                                 <Link
