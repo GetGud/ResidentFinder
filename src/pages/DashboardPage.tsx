@@ -29,10 +29,11 @@ import {
     CreditCard,
     Star,
     TrendingDown,
-    ArrowUpRight
+    ArrowUpRight,
+    BedDouble
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { MOCK_SAVED_PROPERTIES, MOCK_TOURS, MOCK_APPLICATIONS, MOCK_MESSAGES } from '../data/mockData';
+import { MOCK_SAVED_PROPERTIES, MOCK_TOURS, MOCK_APPLICATIONS, MOCK_MESSAGES, MOCK_BOOKED_STAYS, MOCK_SAVED_STAYS } from '../data/mockData';
 import { Modal, ConfirmDialog } from '../components/Modal';
 import { Tour } from '../types';
 
@@ -49,6 +50,7 @@ const NAV_ITEMS: NavItem[] = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'saved', label: 'Saved', icon: Heart, count: MOCK_SAVED_PROPERTIES.length },
     { id: 'tours', label: 'Tours', icon: Calendar, count: MOCK_TOURS.filter(t => t.status === 'upcoming').length },
+    { id: 'stays', label: 'Stays', icon: BedDouble, count: MOCK_BOOKED_STAYS.filter(s => s.status === 'upcoming').length },
     { id: 'applications', label: 'Applications', icon: FileText, count: MOCK_APPLICATIONS.length },
     { id: 'messages', label: 'Messages', icon: MessageSquare, count: MOCK_MESSAGES.reduce((acc, m) => acc + m.unread, 0) },
     { id: 'settings', label: 'Settings', icon: Settings },
@@ -74,7 +76,7 @@ const TopNavigation = ({ activeTab, setActiveTab }: { activeTab: string, setActi
     return (
         <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
             {/* Main Header */}
-            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
                 <div className="flex items-center gap-8">
                     {/* Mobile Menu Button */}
                     <button
@@ -137,7 +139,7 @@ const TopNavigation = ({ activeTab, setActiveTab }: { activeTab: string, setActi
 
             {/* Desktop Navigation */}
             <div className="hidden md:block border-t border-gray-100">
-                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
                     <nav className="flex items-center space-x-1 -mb-px overflow-x-auto hide-scrollbar">
                         {NAV_ITEMS.map((item) => {
                             const isActive = activeTab === item.id;
@@ -874,7 +876,7 @@ const SettingsTab = () => {
     const [priceAlerts, setPriceAlerts] = useState(true);
 
     return (
-        <div className="space-y-8 max-w-3xl">
+        <div className="space-y-8 max-w-3xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900">Account Settings</h2>
 
             {/* Profile Section */}
@@ -978,6 +980,153 @@ const SettingsTab = () => {
                     <button className="px-4 py-2 border border-red-300 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50">
                         Delete Account
                     </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- Stays Tab ---
+const StaysTab = () => {
+    const upcomingStays = MOCK_BOOKED_STAYS.filter(s => s.status === 'upcoming');
+    const displaySavedStays = MOCK_SAVED_STAYS;
+
+    return (
+        <div className="space-y-12">
+            {/* Upcoming Stays */}
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-900">Your Trips</h2>
+                        <p className="text-gray-500 mt-1">Manage your upcoming and past stays.</p>
+                    </div>
+                </div>
+
+                {upcomingStays.length > 0 ? (
+                    <div className="grid gap-6">
+                        {upcomingStays.map((stay) => (
+                            <div key={stay.id} className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100 p-5 flex flex-col md:flex-row gap-6 group hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all duration-300">
+                                <div className="w-full md:w-48 aspect-video md:aspect-[4/3] rounded-xl overflow-hidden shadow-sm relative shrink-0">
+                                    <img src={stay.image} alt={stay.title} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/10" />
+                                </div>
+                                <div className="flex-1 min-w-0 flex flex-col">
+                                    <div className="flex justify-between items-start gap-4 mb-3">
+                                        <div>
+                                            <h3 className="font-bold text-gray-900 text-xl">{stay.title}</h3>
+                                            <p className="text-gray-500 flex items-center gap-1.5 text-sm mt-1">
+                                                <MapPin size={14} /> {stay.location}
+                                            </p>
+                                        </div>
+                                        <span className="bg-[#134e4a]/10 text-[#134e4a] px-3 py-1 rounded-full text-xs font-bold shrink-0">
+                                            {stay.status === 'upcoming' ? 'CONFIRMED' : 'COMPLETED'}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 mb-6 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1.5 bg-white rounded-md shadow-sm text-[#134e4a]">
+                                                <Calendar size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase">Check In</p>
+                                                <span className="font-bold text-gray-900">{stay.checkIn}</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-px h-8 bg-gray-200 hidden sm:block" />
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1.5 bg-white rounded-md shadow-sm text-[#134e4a]">
+                                                <Calendar size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase">Check Out</p>
+                                                <span className="font-bold text-gray-900">{stay.checkOut}</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-px h-8 bg-gray-200 hidden sm:block" />
+                                        <div className="flex items-center gap-2">
+                                            <div className="p-1.5 bg-white rounded-md shadow-sm text-[#134e4a]">
+                                                <User size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase">Host</p>
+                                                <span className="font-bold text-gray-900">{stay.host}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3 mt-auto">
+                                        <Link to={`/stays/${stay.stayId}`} className="px-5 py-2.5 bg-[#134e4a] text-white rounded-xl text-sm font-bold hover:bg-[#0f3f3c] shadow-md shadow-[#134e4a]/10 transition-all btn-press text-center">
+                                            View Details
+                                        </Link>
+                                        <button className="px-5 py-2.5 border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all btn-press">
+                                            Get Directions
+                                        </button>
+                                        <button className="ml-auto px-5 py-2.5 border border-transparent text-gray-500 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-gray-900 transition-all btn-press">
+                                            Message Host
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-white border border-dashed border-gray-300 rounded-2xl p-12 text-center">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                            <BedDouble size={32} />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">No upcoming trips</h3>
+                        <p className="text-gray-500 mb-6">Explore unique homes and experiences for your next getaway.</p>
+                        <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 bg-[#134e4a] text-white rounded-xl font-bold hover:bg-[#0f3f3c] transition-all shadow-lg shadow-[#134e4a]/20">
+                            <Search size={18} /> Explore Stays
+                        </Link>
+                    </div>
+                )}
+            </div>
+
+            {/* Saved Stays */}
+            <div className="pt-8 border-t border-gray-200">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Saved Stays</h2>
+                    <span className="text-gray-500 font-medium">{displaySavedStays.length} saved</span>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {displaySavedStays.map((stay) => (
+                        <div key={stay.id} className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden group hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300 cursor-pointer">
+                            <div className="relative aspect-[4/3] overflow-hidden">
+                                <img
+                                    src={stay.image}
+                                    alt={stay.title}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+                                <button className="absolute top-3 right-3 p-2.5 bg-white/90 backdrop-blur rounded-full text-rose-500 hover:bg-white transition-colors shadow-sm">
+                                    <Heart size={18} fill="currentColor" />
+                                </button>
+                                <div className="absolute bottom-4 left-4 text-white">
+                                    <div className="text-xl font-bold tracking-tight">${stay.pricePerNight} <span className="text-sm font-medium opacity-90">/night</span></div>
+                                    <div className="text-sm font-medium opacity-90">{stay.type} • {stay.guests} guests</div>
+                                </div>
+                            </div>
+                            <div className="p-4">
+                                <div className="flex justify-between items-start mb-2">
+                                    <h3 className="font-bold text-gray-900 truncate flex-1 pr-2">{stay.title}</h3>
+                                    <div className="flex items-center gap-1">
+                                        <Star size={14} className="fill-orange-400 text-orange-400" />
+                                        <span className="text-sm font-bold text-gray-900">{stay.rating}</span>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-500 mb-4">{stay.location}</p>
+                                <Link
+                                    to={`/stays/${stay.id}`}
+                                    className="block w-full bg-gray-50 text-gray-900 py-2.5 rounded-xl text-sm font-bold text-center hover:bg-[#134e4a] hover:text-white transition-all"
+                                >
+                                    Check Availability
+                                </Link>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -1152,6 +1301,8 @@ export function DashboardPage() {
                 return <SavedListingsTab />;
             case 'tours':
                 return <ToursTab onReschedule={handleReschedule} onCancel={handleCancel} />;
+            case 'stays':
+                return <StaysTab />;
             case 'applications':
                 return <ApplicationsTab />;
             case 'messages':
@@ -1268,7 +1419,7 @@ export function DashboardPage() {
 
             {/* Footer */}
             <footer className="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
-                <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8">
+                <div className="max-w-[1920px] mx-auto px-4 grid md:grid-cols-4 gap-8">
                     <div>
                         <div className="flex items-center gap-2 mb-6">
                             <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
@@ -1305,7 +1456,7 @@ export function DashboardPage() {
                         </ul>
                     </div>
                 </div>
-                <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-gray-800 text-sm text-center">
+                <div className="max-w-[1920px] mx-auto px-4 mt-12 pt-8 border-t border-gray-800 text-sm text-center">
                     © 2024 ResidentFinder. All rights reserved.
                 </div>
             </footer>

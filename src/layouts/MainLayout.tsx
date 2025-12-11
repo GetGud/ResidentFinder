@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { Footer } from '../components/Footer';
 
 interface MainLayoutProps {
     children: ReactNode;
@@ -65,51 +66,7 @@ const MainHeader = () => {
     );
 };
 
-// Shared footer component
-const MainFooter = () => (
-    <footer className="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8">
-            <div>
-                <div className="flex items-center gap-2 mb-6">
-                    <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">R</span>
-                    </div>
-                    <span className="text-lg font-bold text-white">ResidentFinder</span>
-                </div>
-                <p className="text-sm">
-                    The most trusted rental resource. We verify listings so you can search with confidence.
-                </p>
-            </div>
-            <div>
-                <h4 className="text-white font-bold mb-4">Renters</h4>
-                <ul className="space-y-2 text-sm">
-                    <li><Link to="/search" className="hover:text-white">Find Apartments</Link></li>
-                    <li><a href="#" className="hover:text-white">Rental Guides</a></li>
-                    <li><a href="#" className="hover:text-white">Homes for Rent</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 className="text-white font-bold mb-4">Property Managers</h4>
-                <ul className="space-y-2 text-sm">
-                    <li><Link to="/manager" className="hover:text-white">Manager Dashboard</Link></li>
-                    <li><a href="#" className="hover:text-white">Screening Services</a></li>
-                    <li><a href="#" className="hover:text-white">Rental Manager</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 className="text-white font-bold mb-4">Company</h4>
-                <ul className="space-y-2 text-sm">
-                    <li><a href="#" className="hover:text-white">About Us</a></li>
-                    <li><a href="#" className="hover:text-white">Careers</a></li>
-                    <li><a href="#" className="hover:text-white">Contact</a></li>
-                </ul>
-            </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-gray-800 text-sm text-center">
-            © 2024 ResidentFinder. All rights reserved.
-        </div>
-    </footer>
-);
+
 
 export function MainLayout({ children, hideFooter = false }: MainLayoutProps) {
     return (
@@ -123,7 +80,7 @@ export function MainLayout({ children, hideFooter = false }: MainLayoutProps) {
             <main className="pt-16">
                 {children}
             </main>
-            {!hideFooter && <MainFooter />}
+            {!hideFooter && <Footer />}
         </div>
     );
 }

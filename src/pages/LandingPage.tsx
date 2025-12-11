@@ -18,6 +18,7 @@ import { RecentlyViewedCarousel } from '../components/RecentlyViewedCarousel';
 import { MOCK_PROPERTIES } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 import { RoleSwitcher } from '../components/RoleSwitcher';
+import { Footer } from '../components/Footer';
 
 // --- Role-Based Navigation Links ---
 const LandingNavLinks = () => {
@@ -58,7 +59,7 @@ const Header = () => {
     return (
         <>
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-[1920px] mx-auto px-4 h-16 flex items-center justify-between">
+                <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-8">
                         {/* Logo */}
                         <Link to="/" onClick={handleLogoClick} className="flex items-center gap-2">
@@ -662,51 +663,7 @@ const LifestyleGrid = () => {
     );
 };
 
-// --- Footer ---
-const Footer = () => (
-    <footer className="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8">
-            <div>
-                <div className="flex items-center gap-2 mb-6">
-                    <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">R</span>
-                    </div>
-                    <span className="text-lg font-bold text-white">ResidentFinder</span>
-                </div>
-                <p className="text-sm">
-                    The most trusted rental resource. We verify listings so you can search with confidence.
-                </p>
-            </div>
-            <div>
-                <h4 className="text-white font-bold mb-4">Renters</h4>
-                <ul className="space-y-2 text-sm">
-                    <li><Link to="/search" className="hover:text-white">Find Apartments</Link></li>
-                    <li><a href="#" className="hover:text-white">Rental Guides</a></li>
-                    <li><a href="#" className="hover:text-white">Homes for Rent</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 className="text-white font-bold mb-4">Property Managers</h4>
-                <ul className="space-y-2 text-sm">
-                    <li><Link to="/manager" className="hover:text-white">List a Property</Link></li>
-                    <li><Link to="/manager" className="hover:text-white">Screening Services</Link></li>
-                    <li><Link to="/manager" className="hover:text-white">Rental Manager</Link></li>
-                </ul>
-            </div>
-            <div>
-                <h4 className="text-white font-bold mb-4">Company</h4>
-                <ul className="space-y-2 text-sm">
-                    <li><a href="#" className="hover:text-white">About Us</a></li>
-                    <li><a href="#" className="hover:text-white">Careers</a></li>
-                    <li><a href="#" className="hover:text-white">Contact</a></li>
-                </ul>
-            </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-gray-800 text-sm text-center">
-            © 2024 ResidentFinder. All rights reserved.
-        </div>
-    </footer>
-);
+
 
 // --- Main Component ---
 export function LandingPage() {

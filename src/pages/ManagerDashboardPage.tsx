@@ -43,57 +43,31 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Modal } from '../components/Modal';
+import {
+    MOCK_MANAGER_STATS,
+    MOCK_STAYS_STATS,
+    MOCK_LEADS,
+    MOCK_MANAGER_PROPERTIES,
+    MOCK_TENANTS,
+    MOCK_MANAGER_STAYS,
+    MOCK_GUESTS
+} from '../data/mockData';
 
-// --- Mock Data ---
-const STATS = [
-    { label: 'Total Properties', value: '12', change: '+2 this month', trend: 'up', icon: Building2 },
-    { label: 'Occupancy Rate', value: '94%', change: '+1.5%', trend: 'up', icon: Users },
-    { label: 'Active Leads', value: '28', change: '+12 this week', trend: 'up', icon: MessageSquare },
-    { label: 'Total Revenue', value: '$142.5k', change: '+$8.2k', trend: 'up', icon: BarChart3 },
-];
+// --- Mock Data --- (Refactored to use centralized data)
+const STATS = MOCK_MANAGER_STATS;
+const STAYS_STATS = MOCK_STAYS_STATS;
+const LEADS = MOCK_LEADS;
+const PROPERTIES = MOCK_MANAGER_PROPERTIES;
+const TENANTS = MOCK_TENANTS;
+const STAYS = MOCK_MANAGER_STAYS;
+const GUESTS = MOCK_GUESTS;
 
-const LEADS = [
-    { id: 1, name: 'Sarah Jenkins', email: 'sarah.j@email.com', phone: '(206) 555-0123', property: 'The Emerald Heights', unit: '10B', status: 'New', date: '2 mins ago', avatar: 'SJ' },
-    { id: 2, name: 'Michael Chen', email: 'mchen@email.com', phone: '(206) 555-0456', property: 'Pineview Lofts', unit: '404', status: 'Tour Scheduled', date: '1 hour ago', avatar: 'MC' },
-    { id: 3, name: 'David Wilson', email: 'dwilson@email.com', phone: '(206) 555-0789', property: 'Azure Waterfront', unit: 'PH2', status: 'Applied', date: '3 hours ago', avatar: 'DW' },
-    { id: 4, name: 'Emma Rodriguez', email: 'emma.r@email.com', phone: '(206) 555-0321', property: 'The Emerald Heights', unit: '5A', status: 'Contacted', date: 'Yesterday', avatar: 'ER' },
-    { id: 5, name: 'James Kim', email: 'jkim@email.com', phone: '(206) 555-0654', property: 'The Brickyard', unit: '2B', status: 'New', date: 'Yesterday', avatar: 'JK' },
-];
 
-const PROPERTIES = [
-    { id: 1, name: 'The Emerald Heights', address: '2300 4th Ave, Seattle, WA', units: 120, occupied: 116, vacant: 4, revenue: '$58,200', image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=100&q=80' },
-    { id: 2, name: 'Pineview Lofts', address: '1401 E Pine St, Seattle, WA', units: 45, occupied: 43, vacant: 2, revenue: '$24,300', image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=100&q=80' },
-    { id: 3, name: 'Azure Waterfront', address: '1200 Western Ave, Seattle, WA', units: 80, occupied: 79, vacant: 1, revenue: '$42,100', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=100&q=80' },
-    { id: 4, name: 'The Brickyard', address: '2201 NW Market St, Seattle, WA', units: 32, occupied: 30, vacant: 2, revenue: '$17,900', image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=100&q=80' },
-];
-
-const TENANTS = [
-    { id: 1, name: 'Alex Morgan', email: 'alex.m@email.com', phone: '(206) 555-0101', property: 'The Emerald Heights', unit: '10B', leaseEnd: 'Mar 15, 2025', rent: '$2,850', status: 'current', paidThisMonth: true },
-    { id: 2, name: 'Jessica Lee', email: 'jessica.l@email.com', phone: '(206) 555-0102', property: 'Pineview Lofts', unit: '302', leaseEnd: 'Jan 31, 2025', rent: '$1,950', status: 'expiring', paidThisMonth: true },
-    { id: 3, name: 'Robert Chen', email: 'robert.c@email.com', phone: '(206) 555-0103', property: 'Azure Waterfront', unit: '1504', leaseEnd: 'Jun 30, 2025', rent: '$3,400', status: 'current', paidThisMonth: false },
-    { id: 4, name: 'Maria Garcia', email: 'maria.g@email.com', phone: '(206) 555-0104', property: 'The Brickyard', unit: '201', leaseEnd: 'Feb 28, 2025', rent: '$1,650', status: 'expiring', paidThisMonth: true },
-    { id: 5, name: 'Thomas Wright', email: 'thomas.w@email.com', phone: '(206) 555-0105', property: 'The Emerald Heights', unit: '8A', leaseEnd: 'Sep 1, 2025', rent: '$2,650', status: 'current', paidThisMonth: true },
-];
-
-// Stays mock data for manager
-const STAYS = [
-    { id: 1, title: 'Cozy Capitol Hill Studio', location: 'Capitol Hill, Seattle', pricePerNight: 89, rating: 4.92, reviewCount: 156, type: 'Entire place', guests: 2, beds: 1, baths: 1, status: 'active', bookingsThisMonth: 4, revenue: '$1,560', upcomingCheckins: 2, image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=100&q=80' },
-    { id: 2, title: 'Modern Downtown Loft with Views', location: 'Downtown Seattle', pricePerNight: 175, rating: 4.88, reviewCount: 89, type: 'Entire place', guests: 4, beds: 2, baths: 1, status: 'active', bookingsThisMonth: 6, revenue: '$2,940', upcomingCheckins: 1, image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=100&q=80' },
-    { id: 3, title: 'Waterfront Guest Suite', location: 'Ballard, Seattle', pricePerNight: 125, rating: 4.95, reviewCount: 234, type: 'Private room', guests: 2, beds: 1, baths: 1, status: 'draft', bookingsThisMonth: 3, revenue: '$1,875', upcomingCheckins: 0, image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=100&q=80' },
-    { id: 4, title: 'Trendy Queen Anne Apartment', location: 'Queen Anne, Seattle', pricePerNight: 145, rating: 4.78, reviewCount: 67, type: 'Entire place', guests: 3, beds: 1, baths: 1, status: 'active', bookingsThisMonth: 8, revenue: '$2,320', upcomingCheckins: 3, image: 'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=100&q=80' },
-];
-
-const STAYS_STATS = [
-    { label: 'Total Stays', value: '4', change: '+1 this month', trend: 'up', icon: Home },
-    { label: 'Active Bookings', value: '8', change: '+3 this week', trend: 'up', icon: Calendar },
-    { label: 'Upcoming Check-ins', value: '6', change: 'Next 7 days', trend: 'up', icon: Clock },
-    { label: 'Stays Revenue', value: '$8.7k', change: '+$1.2k', trend: 'up', icon: BarChart3 },
-];
 
 const NAV_ITEMS = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'properties', icon: Building2, label: 'Properties' },
-    { id: 'tenants', icon: Users, label: 'Tenants' },
+    { id: 'tenants', icon: Users, label: 'Residents & Guests' },
     { id: 'leads', icon: MessageSquare, label: 'Leads & Inbox', badge: '5' },
     { id: 'analytics', icon: BarChart3, label: 'Analytics' },
     { id: 'settings', icon: Settings, label: 'Settings' },
@@ -186,6 +160,66 @@ const LeadsTable = () => (
     </div>
 );
 
+const RecentBookingsWidget = () => (
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="font-bold text-gray-900">Recent Bookings</h3>
+            <button className="text-sm font-medium text-[#134e4a] hover:text-emerald-700">View All</button>
+        </div>
+        <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50 text-gray-500 font-medium">
+                    <tr>
+                        <th className="px-6 py-3">Guest</th>
+                        <th className="px-6 py-3">Property</th>
+                        <th className="px-6 py-3">Dates</th>
+                        <th className="px-6 py-3">Status</th>
+                        <th className="px-6 py-3 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                    {GUESTS.slice(0, 5).map((guest) => (
+                        <tr key={guest.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center text-xs font-bold">
+                                        {guest.name.split(' ').map(n => n[0]).join('')}
+                                    </div>
+                                    <span className="font-semibold text-gray-900">{guest.name}</span>
+                                </div>
+                            </td>
+                            <td className="px-6 py-4">
+                                <p className="font-medium text-gray-900">{guest.property}</p>
+                                <p className="text-xs text-gray-500">{guest.guests} Guest(s)</p>
+                            </td>
+                            <td className="px-6 py-4 text-gray-600">
+                                {guest.dates}
+                            </td>
+                            <td className="px-6 py-4">
+                                <span className={cn(
+                                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold",
+                                    guest.status === 'current' ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700"
+                                )}>
+                                    <div className={cn(
+                                        "w-1.5 h-1.5 rounded-full",
+                                        guest.status === 'current' ? "bg-green-500" : "bg-blue-500"
+                                    )} />
+                                    {guest.status === 'current' ? 'Checked In' : 'Upcoming'}
+                                </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                                <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100">
+                                    <MoreVertical size={16} />
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    </div>
+);
+
 const MiniPropertyCard = ({ property }: { property: typeof PROPERTIES[0] }) => (
     <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:border-[#134e4a]/50 transition-colors cursor-pointer">
         <img
@@ -209,87 +243,164 @@ const MiniPropertyCard = ({ property }: { property: typeof PROPERTIES[0] }) => (
     </div>
 );
 
+const MiniStayCard = ({ stay }: { stay: typeof STAYS[0] }) => (
+    <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:border-[#134e4a]/50 transition-colors cursor-pointer">
+        <img
+            src={stay.image}
+            alt={stay.title}
+            className="w-16 h-16 rounded-lg object-cover"
+        />
+        <div className="flex-1 min-w-0">
+            <h4 className="font-bold text-gray-900 truncate">{stay.title}</h4>
+            <div className="flex items-center gap-4 mt-1 text-sm">
+                <span className="text-gray-500 flex items-center gap-1"><Star size={12} className="text-amber-500 fill-amber-500" /> {stay.rating}</span>
+                <span className="font-medium text-purple-600">
+                    {stay.upcomingCheckins} Check-ins
+                </span>
+            </div>
+        </div>
+        <ChevronRight className="text-gray-400 w-5 h-5" />
+    </div>
+);
+
 // --- Tab Content Components ---
 
 interface DashboardTabProps {
     onAddProperty?: () => void;
+    onAddStay?: () => void;
 }
 
-const DashboardTab = ({ onAddProperty }: DashboardTabProps) => (
-    <div className="space-y-8">
-        {/* Welcome Header */}
-        <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Property Manager Dashboard</h1>
-            <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your properties.</p>
-        </div>
+const DashboardTab = ({ onAddProperty, onAddStay }: DashboardTabProps) => {
+    const [dashboardContext, setDashboardContext] = useState<'rentals' | 'stays'>('rentals');
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {STATS.map((stat) => (
-                <StatCard key={stat.label} stat={stat} />
-            ))}
-        </div>
+    const currentStats = dashboardContext === 'rentals' ? STATS : STAYS_STATS;
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Chart/Table Area */}
-            <div className="lg:col-span-2 space-y-8">
-                <LeadsTable />
-
-                {/* Chart */}
-                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-bold text-gray-900">Views & Applications</h3>
-                        <select className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-gray-50 outline-none focus:ring-2 focus:ring-[#134e4a]/20">
-                            <option>Last 7 Days</option>
-                            <option>Last 30 Days</option>
-                        </select>
-                    </div>
-                    <div className="h-64 flex items-end justify-between gap-2 px-4">
-                        {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
-                            <div key={i} className="w-full bg-[#f0fdf4] rounded-t-sm relative group">
-                                <div
-                                    className="absolute bottom-0 left-0 right-0 bg-[#134e4a]/80 rounded-t-sm transition-all group-hover:bg-[#134e4a]"
-                                    style={{ height: `${h}%` }}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                    <div className="flex justify-between mt-4 text-xs text-gray-400 font-medium px-4">
-                        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-                    </div>
+    return (
+        <div className="space-y-8">
+            {/* Welcome Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Property Manager Dashboard</h1>
+                    <p className="text-gray-500 mt-1">Welcome back! Here's what's happening with your {dashboardContext} today.</p>
                 </div>
-            </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-gray-900 text-lg">Your Properties</h3>
-                    <button className="p-2 bg-[#134e4a] text-white rounded-full hover:bg-emerald-800 transition-colors">
-                        <Plus size={20} />
+                {/* Context Switcher */}
+                <div className="flex p-1 bg-gray-100 rounded-lg self-start">
+                    <button
+                        onClick={() => setDashboardContext('rentals')}
+                        className={cn(
+                            "px-4 py-2 text-sm font-bold rounded-md transition-all",
+                            dashboardContext === 'rentals'
+                                ? "bg-white text-[#134e4a] shadow-sm"
+                                : "text-gray-500 hover:text-gray-900"
+                        )}
+                    >
+                        Long-Term Rentals
+                    </button>
+                    <button
+                        onClick={() => setDashboardContext('stays')}
+                        className={cn(
+                            "px-4 py-2 text-sm font-bold rounded-md transition-all",
+                            dashboardContext === 'stays'
+                                ? "bg-white text-[#134e4a] shadow-sm"
+                                : "text-gray-500 hover:text-gray-900"
+                        )}
+                    >
+                        Short-Term Stays
                     </button>
                 </div>
+            </div>
 
-                <div className="space-y-4">
-                    {PROPERTIES.slice(0, 3).map(p => (
-                        <MiniPropertyCard key={p.id} property={p} />
-                    ))}
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {currentStats.map((stat) => (
+                    <StatCard key={stat.label} stat={stat} />
+                ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Chart/Table Area */}
+                <div className="lg:col-span-2 space-y-8">
+                    {dashboardContext === 'rentals' ? <LeadsTable /> : <RecentBookingsWidget />}
+
+                    {/* Chart */}
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="font-bold text-gray-900">
+                                {dashboardContext === 'rentals' ? 'Views & Applications' : 'Views & Bookings'}
+                            </h3>
+                            <select className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-gray-50 outline-none focus:ring-2 focus:ring-[#134e4a]/20">
+                                <option>Last 7 Days</option>
+                                <option>Last 30 Days</option>
+                            </select>
+                        </div>
+                        <div className="h-64 flex items-end justify-between gap-2 px-4">
+                            {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
+                                <div key={i} className="w-full bg-[#f0fdf4] rounded-t-sm relative group">
+                                    <div
+                                        className="absolute bottom-0 left-0 right-0 bg-[#134e4a]/80 rounded-t-sm transition-all group-hover:bg-[#134e4a]"
+                                        style={{ height: `${h}%` }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex justify-between mt-4 text-xs text-gray-400 font-medium px-4">
+                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="bg-[#134e4a] rounded-xl p-6 text-white relative overflow-hidden">
-                    <div className="relative z-10">
-                        <h3 className="font-bold text-lg mb-2">Boost Occupancy</h3>
-                        <p className="text-emerald-100 text-sm mb-4">Promote your listings to reach 2x more potential renters.</p>
-                        <button className="bg-white text-[#134e4a] px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-50 transition-colors">
-                            Boost Listings
-                        </button>
+                {/* Right Column */}
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-gray-900 text-lg">
+                            {dashboardContext === 'rentals' ? 'Your Properties' : 'Your Stays'}
+                        </h3>
+                        {dashboardContext === 'rentals' ? (
+                            <button
+                                onClick={onAddProperty}
+                                className="p-2 bg-[#134e4a] text-white rounded-full hover:bg-emerald-800 transition-colors"
+                            >
+                                <Plus size={20} />
+                            </button>
+                        ) : (
+                            <button
+                                onClick={onAddStay}
+                                className="p-2 bg-[#134e4a] text-white rounded-full hover:bg-emerald-800 transition-colors"
+                            >
+                                <Plus size={20} />
+                            </button>
+                        )}
                     </div>
-                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-400/20 rounded-full blur-3xl" />
+
+                    <div className="space-y-4">
+                        {dashboardContext === 'rentals' ? (
+                            PROPERTIES.slice(0, 3).map(p => (
+                                <MiniPropertyCard key={p.id} property={p} />
+                            ))
+                        ) : (
+                            STAYS.slice(0, 3).map(s => (
+                                <MiniStayCard key={s.id} stay={s} />
+                            ))
+                        )}
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="bg-[#134e4a] rounded-xl p-6 text-white relative overflow-hidden">
+                        <div className="relative z-10">
+                            <h3 className="font-bold text-lg mb-2">Boost Occupancy</h3>
+                            <p className="text-emerald-100 text-sm mb-4">Promote your listings to reach 2x more potential {dashboardContext === 'rentals' ? 'renters' : 'guests'}.</p>
+                            <button className="bg-white text-[#134e4a] px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-50 transition-colors">
+                                Boost Listings
+                            </button>
+                        </div>
+                        <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-400/20 rounded-full blur-3xl" />
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 interface PropertiesTabProps {
     onAddProperty: () => void;
@@ -489,6 +600,7 @@ const PropertiesTab = ({ onAddProperty, onAddStay, onEditProperty, onViewPropert
 
 
 const TenantsTab = () => {
+    const [viewMode, setViewMode] = useState<'residents' | 'guests'>('residents');
     const [propertyFilter, setPropertyFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
 
@@ -500,12 +612,50 @@ const TenantsTab = () => {
         return matchesProperty && matchesStatus;
     });
 
+    const filteredGuests = GUESTS.filter(guest => {
+        const matchesProperty = propertyFilter === 'all' || guest.property === propertyFilter;
+        const matchesStatus = statusFilter === 'all' ||
+            (statusFilter === 'upcoming' && guest.status === 'upcoming') ||
+            (statusFilter === 'current' && guest.status === 'current');
+        return matchesProperty && matchesStatus;
+    });
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h2 className="text-2xl font-bold text-gray-900">
-                    Tenants ({filteredTenants.length}{filteredTenants.length !== TENANTS.length && ` of ${TENANTS.length}`})
-                </h2>
+                <div className="flex items-center gap-4">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                        {viewMode === 'residents' ? 'Residents' : 'Guests'} ({viewMode === 'residents' ? filteredTenants.length : filteredGuests.length})
+                    </h2>
+                    {/* View Toggle */}
+                    <div className="flex p-1 bg-gray-100 rounded-lg">
+                        <button
+                            onClick={() => setViewMode('residents')}
+                            className={cn(
+                                "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                                viewMode === 'residents'
+                                    ? "bg-white text-[#134e4a] shadow-sm"
+                                    : "text-gray-600 hover:text-gray-900"
+                            )}
+                        >
+                            <Users className="inline-block w-4 h-4 mr-1.5" />
+                            Residents
+                        </button>
+                        <button
+                            onClick={() => setViewMode('guests')}
+                            className={cn(
+                                "px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
+                                viewMode === 'guests'
+                                    ? "bg-white text-[#134e4a] shadow-sm"
+                                    : "text-gray-600 hover:text-gray-900"
+                            )}
+                        >
+                            <Calendar className="inline-block w-4 h-4 mr-1.5" />
+                            Guests
+                        </button>
+                    </div>
+                </div>
+
                 <div className="flex gap-2">
                     <select
                         value={propertyFilter}
@@ -513,7 +663,10 @@ const TenantsTab = () => {
                         className="px-4 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
                     >
                         <option value="all">All Properties</option>
-                        {PROPERTIES.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+                        {viewMode === 'residents'
+                            ? PROPERTIES.map(p => <option key={p.id} value={p.name}>{p.name}</option>)
+                            : STAYS.map(s => <option key={s.id} value={s.title}>{s.title}</option>)
+                        }
                     </select>
                     <select
                         value={statusFilter}
@@ -521,8 +674,17 @@ const TenantsTab = () => {
                         className="px-4 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a]"
                     >
                         <option value="all">All Status</option>
-                        <option value="current">Current</option>
-                        <option value="expiring">Expiring Soon</option>
+                        {viewMode === 'residents' ? (
+                            <>
+                                <option value="current">Current</option>
+                                <option value="expiring">Expiring Soon</option>
+                            </>
+                        ) : (
+                            <>
+                                <option value="upcoming">Upcoming</option>
+                                <option value="current">Current</option>
+                            </>
+                        )}
                     </select>
                 </div>
             </div>
@@ -532,79 +694,98 @@ const TenantsTab = () => {
                     <table className="w-full text-left text-sm">
                         <thead className="bg-gray-50 text-gray-500 font-medium">
                             <tr>
-                                <th className="px-6 py-3">Tenant</th>
+                                <th className="px-6 py-3">{viewMode === 'residents' ? 'Tenant' : 'Guest'}</th>
                                 <th className="px-6 py-3">Property / Unit</th>
-                                <th className="px-6 py-3">Lease Ends</th>
-                                <th className="px-6 py-3">Rent</th>
-                                <th className="px-6 py-3">This Month</th>
+                                <th className="px-6 py-3">{viewMode === 'residents' ? 'Lease Ends' : 'Dates'}</th>
+                                <th className="px-6 py-3">{viewMode === 'residents' ? 'Rent' : 'Total'}</th>
+                                <th className="px-6 py-3">Status</th>
                                 <th className="px-6 py-3 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {filteredTenants.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                                        No tenants match the selected filters
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredTenants.map((tenant) => (
-                                    <tr key={tenant.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-full bg-[#f0fdf4] text-[#134e4a] flex items-center justify-center font-bold text-sm">
-                                                    {tenant.name.split(' ').map(n => n[0]).join('')}
+                            {viewMode === 'residents' ? (
+                                filteredTenants.length === 0 ? (
+                                    <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">No residents match</td></tr>
+                                ) : (
+                                    filteredTenants.map((tenant) => (
+                                        <tr key={tenant.id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-full bg-[#f0fdf4] text-[#134e4a] flex items-center justify-center font-bold text-sm">
+                                                        {tenant.name.split(' ').map(n => n[0]).join('')}
+                                                    </div>
+                                                    <span className="font-semibold text-gray-900">{tenant.name}</span>
                                                 </div>
-                                                <span className="font-semibold text-gray-900">{tenant.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <p className="font-medium text-gray-900">{tenant.property}</p>
-                                            <p className="text-xs text-gray-500">Unit {tenant.unit}</p>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                {tenant.status === 'expiring' && <AlertCircle size={14} className="text-amber-500" />}
-                                                <span className={cn(tenant.status === 'expiring' ? "text-amber-600 font-medium" : "text-gray-600")}>
-                                                    {tenant.leaseEnd}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <p className="font-medium text-gray-900">{tenant.property}</p>
+                                                <p className="text-xs text-gray-500">Unit {tenant.unit}</p>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    {tenant.status === 'expiring' && <AlertCircle size={14} className="text-amber-500" />}
+                                                    <span className={cn(tenant.status === 'expiring' ? "text-amber-600 font-medium" : "text-gray-600")}>
+                                                        {tenant.leaseEnd}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 font-medium text-gray-900">{tenant.rent}</td>
+                                            <td className="px-6 py-4">
+                                                {tenant.paidThisMonth ? (
+                                                    <span className="inline-flex items-center gap-1 text-green-600 font-medium"><CheckCircle2 size={14} /> Paid</span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 text-red-600 font-medium"><Clock size={14} /> Pending</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <button className="p-1.5 text-gray-400 hover:text-[#134e4a] hover:bg-[#f0fdf4] rounded"><Mail size={16} /></button>
+                                                    <button className="p-1.5 text-gray-400 hover:text-[#134e4a] hover:bg-[#f0fdf4] rounded"><Phone size={16} /></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )
+                            ) : (
+                                filteredGuests.length === 0 ? (
+                                    <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">No guests match</td></tr>
+                                ) : (
+                                    filteredGuests.map((guest) => (
+                                        <tr key={guest.id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 rounded-full bg-purple-50 text-purple-700 flex items-center justify-center font-bold text-sm">
+                                                        {guest.name.split(' ').map(n => n[0]).join('')}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-semibold text-gray-900 block">{guest.name}</span>
+                                                        <span className="text-xs text-gray-500">{guest.guests} guests</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <p className="font-medium text-gray-900">{guest.property}</p>
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-600">{guest.dates}</td>
+                                            <td className="px-6 py-4 font-medium text-gray-900">{guest.total}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={cn(
+                                                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold",
+                                                    guest.status === 'current' ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700"
+                                                )}>
+                                                    <div className={cn("w-1.5 h-1.5 rounded-full", guest.status === 'current' ? "bg-green-500" : "bg-blue-500")} />
+                                                    {guest.status === 'current' ? 'Checked In' : 'Upcoming'}
                                                 </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 font-medium text-gray-900">{tenant.rent}</td>
-                                        <td className="px-6 py-4">
-                                            {tenant.paidThisMonth ? (
-                                                <span className="inline-flex items-center gap-1 text-green-600 font-medium">
-                                                    <CheckCircle2 size={14} /> Paid
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 text-red-600 font-medium">
-                                                    <Clock size={14} /> Pending
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <a
-                                                    href={`mailto:${tenant.email}?subject=Re: Unit ${tenant.unit} at ${tenant.property}`}
-                                                    className="p-1.5 text-gray-400 hover:text-[#134e4a] hover:bg-[#f0fdf4] rounded transition-colors"
-                                                    title={`Email ${tenant.name}`}
-                                                >
-                                                    <Mail size={16} />
-                                                </a>
-                                                <a
-                                                    href={`tel:${tenant.phone.replace(/[^\d]/g, '')}`}
-                                                    className="p-1.5 text-gray-400 hover:text-[#134e4a] hover:bg-[#f0fdf4] rounded transition-colors"
-                                                    title={`Call ${tenant.phone}`}
-                                                >
-                                                    <Phone size={16} />
-                                                </a>
-                                                <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
-                                                    <MoreVertical size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <button className="p-1.5 text-gray-400 hover:text-[#134e4a] hover:bg-[#f0fdf4] rounded"><Mail size={16} /></button>
+                                                    <button className="p-1.5 text-gray-400 hover:text-[#134e4a] hover:bg-[#f0fdf4] rounded"><Phone size={16} /></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )
                             )}
                         </tbody>
                     </table>
@@ -677,6 +858,7 @@ const LeadsTab = () => {
                         <thead className="bg-gray-50 text-gray-500 font-medium">
                             <tr>
                                 <th className="px-6 py-3">Prospect</th>
+                                <th className="px-6 py-3">Type</th>
                                 <th className="px-6 py-3">Contact</th>
                                 <th className="px-6 py-3">Property / Unit</th>
                                 <th className="px-6 py-3">Status</th>
@@ -687,7 +869,7 @@ const LeadsTab = () => {
                         <tbody className="divide-y divide-gray-100">
                             {filteredLeads.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                                         No leads match the selected filter
                                     </td>
                                 </tr>
@@ -701,6 +883,17 @@ const LeadsTab = () => {
                                                 </div>
                                                 <span className="font-semibold text-gray-900">{lead.name}</span>
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {STAYS.some(s => s.title === lead.property) ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700">
+                                                    <Home size={12} /> Stay
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
+                                                    <Building2 size={12} /> Lease
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4">
                                             <p className="text-gray-900">{lead.email}</p>
@@ -989,7 +1182,7 @@ export function ManagerDashboardPage() {
 
     const renderTabContent = () => {
         switch (activeItem) {
-            case 'dashboard': return <DashboardTab onAddProperty={handleAddProperty} />;
+            case 'dashboard': return <DashboardTab onAddProperty={handleAddProperty} onAddStay={handleAddStay} />;
             case 'properties': return (
                 <PropertiesTab
                     onAddProperty={handleAddProperty}
@@ -1004,7 +1197,7 @@ export function ManagerDashboardPage() {
             case 'leads': return <LeadsTab />;
             case 'analytics': return <AnalyticsTab />;
             case 'settings': return <SettingsTab onInvite={() => setInviteModal(true)} />;
-            default: return <DashboardTab onAddProperty={handleAddProperty} />;
+            default: return <DashboardTab onAddProperty={handleAddProperty} onAddStay={handleAddStay} />;
         }
     };
 
@@ -1019,7 +1212,7 @@ export function ManagerDashboardPage() {
 
             {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
-                <div className="max-w-[1920px] mx-auto px-4 h-16 flex items-center justify-between gap-4">
+                <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -1720,7 +1913,7 @@ export function ManagerDashboardPage() {
 
             {/* Footer */}
             <footer className="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
-                <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8">
+                <div className="max-w-[1920px] mx-auto px-4 grid md:grid-cols-4 gap-8">
                     <div>
                         <div className="flex items-center gap-2 mb-6">
                             <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
@@ -1757,7 +1950,7 @@ export function ManagerDashboardPage() {
                         </ul>
                     </div>
                 </div>
-                <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-gray-800 text-sm text-center">
+                <div className="max-w-[1920px] mx-auto px-4 mt-12 pt-8 border-t border-gray-800 text-sm text-center">
                     © 2024 ResidentFinder. All rights reserved.
                 </div>
             </footer>

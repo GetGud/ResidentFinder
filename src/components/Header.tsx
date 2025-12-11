@@ -272,7 +272,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
     return (
         <>
             <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm font-sans">
-                <div className="max-w-[1920px] mx-auto px-4 h-16 flex items-center justify-between gap-4">
+                <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
                     {/* Mobile Menu Button */}
                     <button
                         onClick={() => setMobileMenuOpen(true)}
@@ -320,7 +320,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                 </div>
 
                 {/* Mobile Search Bar */}
-                <div className="md:hidden px-4 pb-3">
+                <div className="md:hidden px-4 sm:px-6 pb-3">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
@@ -333,7 +333,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                 </div>
 
                 {/* Filters Bar */}
-                <div ref={dropdownRef} className="border-t border-gray-100 py-2 px-4 bg-white flex items-center gap-3 overflow-x-auto no-scrollbar">
+                <div ref={dropdownRef} className="border-t border-gray-100 py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center gap-3 overflow-x-auto no-scrollbar">
                     {/* Price Filter */}
                     <div className="relative">
                         <button

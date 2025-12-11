@@ -1,3 +1,4 @@
+import { Building2, Users, MessageSquare, BarChart3, Home, Calendar, Clock } from 'lucide-react';
 import { Property, Tour, Application, Message, Stay, BuyProperty } from '../types';
 
 export const MOCK_PROPERTIES: Property[] = [
@@ -557,4 +558,85 @@ export const MOCK_MANAGER_STAYS = MOCK_STAYS.map((stay, i) => ({
     upcomingCheckins: [2, 1, 0, 3][i],
     avgOccupancy: ['78%', '92%', '45%', '85%'][i]
 }));
+
+
+// Booked stays (upcoming/past)
+export const MOCK_BOOKED_STAYS = [
+    {
+        id: '1',
+        stayId: '2',
+        title: 'Modern Downtown Loft with Views',
+        location: 'Downtown Seattle',
+        image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80',
+        checkIn: 'Dec 15, 2024',
+        checkOut: 'Dec 18, 2024',
+        status: 'upcoming',
+        totalPrice: '$525',
+        host: 'Marcus',
+        guests: 2
+    },
+    {
+        id: '2',
+        stayId: '3',
+        title: 'Waterfront Guest Suite',
+        location: 'Ballard, Seattle',
+        image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=800&q=80',
+        checkIn: 'Nov 10, 2024',
+        checkOut: 'Nov 12, 2024',
+        status: 'completed',
+        totalPrice: '$250',
+        host: 'David & Lisa',
+        guests: 2
+    }
+];
+
+// Saved stays
+export const MOCK_SAVED_STAYS = [
+    MOCK_STAYS[0],
+    MOCK_STAYS[3]
+];
+
+// Manager Dashboard Data
+export const MOCK_MANAGER_STATS = [
+    { label: 'Total Properties', value: '12', change: '+2 this month', trend: 'up' as const, icon: Building2 },
+    { label: 'Occupancy Rate', value: '94%', change: '+1.5%', trend: 'up' as const, icon: Users },
+    { label: 'Active Leads', value: '28', change: '+12 this week', trend: 'up' as const, icon: MessageSquare },
+    { label: 'Total Revenue', value: '$142.5k', change: '+$8.2k', trend: 'up' as const, icon: BarChart3 },
+];
+
+export const MOCK_STAYS_STATS = [
+    { label: 'Total Stays', value: '4', change: '+1 this month', trend: 'up' as const, icon: Home },
+    { label: 'Active Bookings', value: '8', change: '+3 this week', trend: 'up' as const, icon: Calendar },
+    { label: 'Upcoming Check-ins', value: '6', change: 'Next 7 days', trend: 'up' as const, icon: Clock },
+    { label: 'Stays Revenue', value: '$8.7k', change: '+$1.2k', trend: 'up' as const, icon: BarChart3 },
+];
+
+export const MOCK_LEADS = [
+    { id: 1, name: 'Sarah Jenkins', email: 'sarah.j@email.com', phone: '(206) 555-0123', property: 'The Emerald Heights', unit: '10B', status: 'New', date: '2 mins ago', avatar: 'SJ' },
+    { id: 2, name: 'Michael Chen', email: 'mchen@email.com', phone: '(206) 555-0456', property: 'Pineview Lofts', unit: '404', status: 'Tour Scheduled', date: '1 hour ago', avatar: 'MC' },
+    { id: 3, name: 'David Wilson', email: 'dwilson@email.com', phone: '(206) 555-0789', property: 'Azure Waterfront', unit: 'PH2', status: 'Applied', date: '3 hours ago', avatar: 'DW' },
+    { id: 4, name: 'Emma Rodriguez', email: 'emma.r@email.com', phone: '(206) 555-0321', property: 'The Emerald Heights', unit: '5A', status: 'Contacted', date: 'Yesterday', avatar: 'ER' },
+    { id: 5, name: 'James Kim', email: 'jkim@email.com', phone: '(206) 555-0654', property: 'The Brickyard', unit: '2B', status: 'New', date: 'Yesterday', avatar: 'JK' },
+];
+
+export const MOCK_MANAGER_PROPERTIES = [
+    { id: 1, name: 'The Emerald Heights', address: '2300 4th Ave, Seattle, WA', units: 120, occupied: 116, vacant: 4, revenue: '$58,200', image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=100&q=80' },
+    { id: 2, name: 'Pineview Lofts', address: '1401 E Pine St, Seattle, WA', units: 45, occupied: 43, vacant: 2, revenue: '$24,300', image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=100&q=80' },
+    { id: 3, name: 'Azure Waterfront', address: '1200 Western Ave, Seattle, WA', units: 80, occupied: 79, vacant: 1, revenue: '$42,100', image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=100&q=80' },
+    { id: 4, name: 'The Brickyard', address: '2201 NW Market St, Seattle, WA', units: 32, occupied: 30, vacant: 2, revenue: '$17,900', image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=100&q=80' },
+];
+
+export const MOCK_TENANTS = [
+    { id: 1, name: 'Alex Morgan', email: 'alex.m@email.com', phone: '(206) 555-0101', property: 'The Emerald Heights', unit: '10B', leaseEnd: 'Mar 15, 2025', rent: '$2,850', status: 'current', paidThisMonth: true },
+    { id: 2, name: 'Jessica Lee', email: 'jessica.l@email.com', phone: '(206) 555-0102', property: 'Pineview Lofts', unit: '302', leaseEnd: 'Jan 31, 2025', rent: '$1,950', status: 'expiring', paidThisMonth: true },
+    { id: 3, name: 'Robert Chen', email: 'robert.c@email.com', phone: '(206) 555-0103', property: 'Azure Waterfront', unit: '1504', leaseEnd: 'Jun 30, 2025', rent: '$3,400', status: 'current', paidThisMonth: false },
+    { id: 4, name: 'Maria Garcia', email: 'maria.g@email.com', phone: '(206) 555-0104', property: 'The Brickyard', unit: '201', leaseEnd: 'Feb 28, 2025', rent: '$1,650', status: 'expiring', paidThisMonth: true },
+    { id: 5, name: 'Thomas Wright', email: 'thomas.w@email.com', phone: '(206) 555-0105', property: 'The Emerald Heights', unit: '8A', leaseEnd: 'Sep 1, 2025', rent: '$2,650', status: 'current', paidThisMonth: true },
+];
+
+export const MOCK_GUESTS = [
+    { id: 1, name: 'Marcus Johnson', email: 'marcus.j@email.com', phone: '(415) 555-0199', property: 'Modern Downtown Loft', dates: 'Dec 15 - Dec 18', guests: 2, total: '$525', status: 'upcoming', paid: true },
+    { id: 2, name: 'Sarah & Tom', email: 'sarah.t@email.com', phone: '(503) 555-0188', property: 'Waterfront Guest Suite', dates: 'Dec 20 - Dec 27', guests: 2, total: '$875', status: 'upcoming', paid: true },
+    { id: 3, name: 'Elena Rodriguez', email: 'elena.r@email.com', phone: '(206) 555-0177', property: 'Cozy Capitol Hill Studio', dates: 'Currently staying', guests: 1, total: '$267', status: 'current', paid: true },
+];
 
