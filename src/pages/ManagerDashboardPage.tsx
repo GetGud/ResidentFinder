@@ -951,83 +951,280 @@ const LeadsTab = () => {
     );
 };
 
-const AnalyticsTab = () => (
-    <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-gray-900">Analytics</h2>
+const AnalyticsTab = () => {
+    const [context, setContext] = useState<'rentals' | 'stays'>('rentals');
+    const [timeRange, setTimeRange] = useState('30d');
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {STATS.map((stat) => (
-                <StatCard key={stat.label} stat={stat} />
-            ))}
-        </div>
+    // Enhanced Mock Data for Analytics
+    const RENTAL_KPI = [
+        { label: 'Total Revenue', value: '$142,500', change: '+$8.2k', trend: 'up', icon: DollarSign, color: 'text-emerald-700', bg: 'bg-emerald-50' },
+        { label: 'Occupancy Rate', value: '94%', change: '+1.5%', trend: 'up', icon: Users, color: 'text-blue-700', bg: 'bg-blue-50' },
+        { label: 'Outstanding Rent', value: '$4,250', change: '-$1.2k', trend: 'down', icon: AlertCircle, color: 'text-amber-700', bg: 'bg-amber-50' },
+        { label: 'Active Leads', value: '28', change: '+12', trend: 'up', icon: MessageSquare, color: 'text-purple-700', bg: 'bg-purple-50' },
+    ];
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Revenue Chart */}
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-bold text-gray-900">Monthly Revenue</h3>
-                    <select className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-gray-50">
-                        <option>Last 6 Months</option>
-                        <option>Last 12 Months</option>
+    const STAY_KPI = [
+        { label: 'Gross Revenue', value: '$12,450', change: '+$2.1k', trend: 'up', icon: DollarSign, color: 'text-emerald-700', bg: 'bg-emerald-50' },
+        { label: 'Occupancy Rate', value: '78%', change: '+5%', trend: 'up', icon: Bed, color: 'text-blue-700', bg: 'bg-blue-50' },
+        { label: 'Avg Nightly Rate', value: '$145', change: '+$15', trend: 'up', icon: TrendingUp, color: 'text-indigo-700', bg: 'bg-indigo-50' },
+        { label: 'Guest Rating', value: '4.85', change: '+0.2', trend: 'up', icon: Star, color: 'text-amber-700', bg: 'bg-amber-50' },
+    ];
+
+    const REVENUE_DATA = [
+        { month: 'Jul', rental: 125000, stay: 8500 },
+        { month: 'Aug', rental: 128000, stay: 10200 },
+        { month: 'Sep', rental: 132000, stay: 9800 },
+        { month: 'Oct', rental: 135000, stay: 11500 },
+        { month: 'Nov', rental: 138000, stay: 10800 },
+        { month: 'Dec', rental: 142500, stay: 12450 },
+    ];
+
+    const kpis = context === 'rentals' ? RENTAL_KPI : STAY_KPI;
+
+    return (
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Header Controls */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
+                    <p className="text-gray-500 mt-1">
+                        Performance metrics for your <span className="font-semibold text-[#134e4a]">{context === 'rentals' ? 'Long-Term Rentals' : 'Short-Term Stays'}</span>
+                    </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                    {/* Context Switcher */}
+                    <div className="flex p-1 bg-gray-100 rounded-lg">
+                        <button
+                            onClick={() => setContext('rentals')}
+                            className={cn(
+                                "px-3 py-1.5 text-sm font-bold rounded-md transition-all flex items-center gap-2",
+                                context === 'rentals' ? "bg-white text-[#134e4a] shadow-sm" : "text-gray-500 hover:text-gray-900"
+                            )}
+                        >
+                            <Building2 size={16} /> Rentals
+                        </button>
+                        <button
+                            onClick={() => setContext('stays')}
+                            className={cn(
+                                "px-3 py-1.5 text-sm font-bold rounded-md transition-all flex items-center gap-2",
+                                context === 'stays' ? "bg-white text-[#134e4a] shadow-sm" : "text-gray-500 hover:text-gray-900"
+                            )}
+                        >
+                            <Home size={16} /> Stays
+                        </button>
+                    </div>
+
+                    {/* Time Range */}
+                    <select
+                        value={timeRange}
+                        onChange={(e) => setTimeRange(e.target.value)}
+                        className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#134e4a]/20"
+                    >
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d">Last 30 Days</option>
+                        <option value="90d">Last Quarter</option>
+                        <option value="12m">Last 12 Months</option>
                     </select>
                 </div>
-                <div className="h-64 flex items-end justify-between gap-3">
-                    {[65, 72, 68, 85, 78, 92].map((h, i) => (
-                        <div key={i} className="flex-1 flex flex-col items-center">
-                            <div className="w-full bg-[#134e4a] rounded-t" style={{ height: `${h * 2}px` }} />
-                            <span className="text-xs text-gray-400 mt-2">{['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i]}</span>
-                        </div>
-                    ))}
-                </div>
             </div>
 
-            {/* Occupancy Trend */}
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-bold text-gray-900">Occupancy Rate</h3>
-                    <span className="text-2xl font-bold text-[#134e4a]">94%</span>
-                </div>
-                <div className="space-y-4">
-                    {PROPERTIES.map((p) => (
-                        <div key={p.id}>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="font-medium text-gray-700">{p.name}</span>
-                                <span className="text-gray-500">{Math.round((p.occupied / p.units) * 100)}%</span>
+            {/* KPI Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {kpis.map((kpi, i) => (
+                    <div key={i} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className={cn("p-3 rounded-xl transition-colors", kpi.bg, "group-hover:scale-110 duration-300")}>
+                                <kpi.icon size={24} className={kpi.color} />
                             </div>
-                            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-[#134e4a] rounded-full"
-                                    style={{ width: `${(p.occupied / p.units) * 100}%` }}
-                                />
-                            </div>
+                            <span className={cn(
+                                "text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1",
+                                kpi.change.startsWith('+') ? "text-emerald-700 bg-emerald-50" : "text-red-700 bg-red-50"
+                            )}>
+                                {kpi.trend === 'up' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                                {kpi.change}
+                            </span>
                         </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-
-        {/* Lead Conversion */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-            <h3 className="font-bold text-gray-900 mb-6">Lead Conversion Funnel</h3>
-            <div className="flex items-center justify-between gap-4">
-                {[
-                    { label: 'Total Leads', value: 156, color: 'bg-blue-500' },
-                    { label: 'Contacted', value: 112, color: 'bg-orange-500' },
-                    { label: 'Tours Scheduled', value: 67, color: 'bg-purple-500' },
-                    { label: 'Applications', value: 34, color: 'bg-emerald-500' },
-                    { label: 'Leases Signed', value: 28, color: 'bg-[#134e4a]' },
-                ].map((stage, i) => (
-                    <div key={i} className="flex-1 text-center">
-                        <div className={cn("h-24 rounded-lg flex items-end justify-center", stage.color)} style={{ opacity: 1 - (i * 0.15) }}>
-                            <span className="text-white font-bold text-2xl pb-2">{stage.value}</span>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-2 font-medium">{stage.label}</p>
+                        <h3 className="text-3xl font-extrabold text-gray-900 tracking-tight">{kpi.value}</h3>
+                        <p className="text-sm text-gray-500 font-medium mt-1">{kpi.label}</p>
                     </div>
                 ))}
             </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Graph - Revenue Trend */}
+                <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 className="font-bold text-gray-900 text-lg">Revenue Trends</h3>
+                            <p className="text-sm text-gray-500">Monthly breakdown for {context}</p>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm font-medium">
+                            <div className="flex items-center gap-2">
+                                <span className={cn("w-3 h-3 rounded-full", context === 'rentals' ? "bg-[#134e4a]" : "bg-indigo-600")} />
+                                <span>{context === 'rentals' ? 'Rental Income' : 'Stay Revenue'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-400">
+                                <span className="w-3 h-3 rounded-full bg-gray-200" />
+                                <span>Projected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* CSS Bar Chart */}
+                    <div className="h-72 flex items-end justify-between gap-4 sm:gap-8 px-2">
+                        {REVENUE_DATA.map((d, i) => {
+                            const val = context === 'rentals' ? d.rental : d.stay;
+                            const height = `${(val / (context === 'rentals' ? 150000 : 15000)) * 100}%`;
+                            return (
+                                <div key={i} className="flex-1 flex flex-col items-center group relative">
+                                    {/* Tooltip */}
+                                    <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs py-1 px-2 rounded shadow-lg whitespace-nowrap z-10 pointer-events-none">
+                                        ${val.toLocaleString()}
+                                    </div>
+
+                                    <div className="w-full relative h-[250px] bg-gray-50 rounded-t-lg overflow-hidden flex items-end">
+                                        <div
+                                            className={cn(
+                                                "w-full rounded-t-sm transition-all duration-700 ease-out",
+                                                context === 'rentals' ? "bg-[#134e4a] group-hover:bg-[#0f3f3c]" : "bg-indigo-600 group-hover:bg-indigo-700"
+                                            )}
+                                            style={{ height: height }}
+                                        />
+                                    </div>
+                                    <span className="text-xs font-semibold text-gray-500 mt-3">{d.month}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Donut Charts / Distribution */}
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+                    <h3 className="font-bold text-gray-900 text-lg mb-6">
+                        {context === 'rentals' ? 'Payment Status' : 'Guest Ratings'}
+                    </h3>
+
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                        {context === 'rentals' ? (
+                            <>
+                                <div className="relative w-48 h-48 rounded-full mb-6" style={{ background: 'conic-gradient(#10b981 0% 75%, #f59e0b 75% 90%, #ef4444 90% 100%)' }}>
+                                    <div className="absolute inset-4 bg-white rounded-full flex flex-col items-center justify-center shadow-inner">
+                                        <span className="text-3xl font-extrabold text-gray-900">92%</span>
+                                        <span className="text-xs text-gray-500 font-bold uppercase tracking-wide">Collected</span>
+                                    </div>
+                                </div>
+                                <div className="w-full space-y-3">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500" /> On Time</span>
+                                        <span className="font-bold text-gray-900">75%</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500" /> Late (&lt;30 days)</span>
+                                        <span className="font-bold text-gray-900">15%</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-red-500" /> Overdue</span>
+                                        <span className="font-bold text-gray-900">10%</span>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="relative w-48 h-48 rounded-full mb-6" style={{ background: 'conic-gradient(#8b5cf6 0% 65%, #3b82f6 65% 90%, #64748b 90% 100%)' }}>
+                                    <div className="absolute inset-4 bg-white rounded-full flex flex-col items-center justify-center shadow-inner">
+                                        <span className="text-3xl font-extrabold text-gray-900">4.8</span>
+                                        <span className="text-xs text-gray-500 font-bold uppercase tracking-wide">Avg Rating</span>
+                                    </div>
+                                </div>
+                                <div className="w-full space-y-3">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="flex items-center gap-2"><Star size={12} className="fill-purple-500 text-purple-500" /> 5 Stars</span>
+                                        <span className="font-bold text-gray-900">65%</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="flex items-center gap-2"><Star size={12} className="fill-blue-500 text-blue-500" /> 4 Stars</span>
+                                        <span className="font-bold text-gray-900">25%</span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="flex items-center gap-2"><Star size={12} className="fill-slate-500 text-slate-500" /> 3 Stars or less</span>
+                                        <span className="font-bold text-gray-900">10%</span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Lead/Inquiry Funnel */}
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 className="font-bold text-gray-900 text-lg mb-6">
+                        {context === 'rentals' ? 'Lead Conversion Funnel' : 'Booking Conversion Funnel'}
+                    </h3>
+                    <div className="space-y-4">
+                        {[
+                            { label: 'Views', value: '1,245', pct: 100, color: 'bg-gray-100' },
+                            { label: 'Inquiries', value: '456', pct: 65, color: 'bg-blue-100' },
+                            { label: context === 'rentals' ? 'Tours' : 'Requests', value: '189', pct: 45, color: 'bg-indigo-100' },
+                            { label: context === 'rentals' ? 'Applications' : 'Pre-Approvals', value: '86', pct: 25, color: 'bg-purple-100' },
+                            { label: context === 'rentals' ? 'Signed Leases' : 'Bookings', value: '42', pct: 15, color: context === 'rentals' ? 'bg-[#134e4a]' : 'bg-indigo-600', text: 'text-white' },
+                        ].map((step, i) => (
+                            <div key={i} className="relative">
+                                <div className="flex justify-between text-sm font-medium mb-1 z-10 relative px-2">
+                                    <span className={step.text || "text-gray-700"}>{step.label}</span>
+                                    <span className={step.text || "text-gray-900"}>{step.value}</span>
+                                </div>
+                                <div className="absolute inset-0 h-full rounded-lg overflow-hidden grid grid-cols-12 bg-gray-50/50">
+                                    <div
+                                        className={cn("col-span-12 h-full rounded-lg transition-all duration-1000", step.color)}
+                                        style={{ width: `${step.pct}%` }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Best Performing Assets */}
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 className="font-bold text-gray-900 text-lg mb-6">Top Performing {context === 'rentals' ? 'Properties' : 'Listings'}</h3>
+                    <div className="space-y-4">
+                        {(context === 'rentals' ? PROPERTIES.slice(0, 3) : STAYS.slice(0, 3)).map((item, i) => (
+                            <div key={item.id} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-gray-100">
+                                <span className={cn(
+                                    "w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold",
+                                    i === 0 ? "bg-yellow-100 text-yellow-700" :
+                                        i === 1 ? "bg-gray-100 text-gray-700" :
+                                            "bg-orange-50 text-orange-700" // Bronze
+                                )}>
+                                    #{i + 1}
+                                </span>
+                                <img src={item.image} alt="Thumbnail" className="w-12 h-12 rounded-lg object-cover" />
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-bold text-gray-900 truncate">{'name' in item ? item.name : item.title}</h4>
+                                    <p className="text-xs text-gray-500">
+                                        {item.revenue} revenue
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold text-[#134e4a]">
+                                        {'occupied' in item ? Math.round(item.occupied / item.units * 100) : 90}%
+                                    </p>
+                                    <p className="text-[10px] text-gray-400 uppercase font-bold">Occ. Rate</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <button className="w-full mt-6 py-2 text-sm font-bold text-[#134e4a] border border-[#134e4a]/30 rounded-lg hover:bg-[#134e4a] hover:text-white transition-all">
+                        View Full Performance Report
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 interface SettingsTabProps {
     onInvite?: () => void;
