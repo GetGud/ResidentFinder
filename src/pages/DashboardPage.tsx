@@ -419,7 +419,7 @@ const SavedListingsTab = ({ onRemoveProperty }: SavedListingsTabProps) => {
                 </button>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
                 {MOCK_SAVED_PROPERTIES.map((property) => (
                     <div key={property.id} className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden group hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-300">
                         <div className="relative aspect-[4/3] overflow-hidden">
