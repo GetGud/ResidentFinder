@@ -127,15 +127,26 @@ export const PropertyCard = ({ property, onMouseEnter, onMouseLeave, onClick }: 
             <div className="p-4 flex flex-col flex-grow">
                 <div className="flex justify-between items-start mb-1">
                     <div>
-                        <h3 className="text-2xl font-bold text-[#134e4a]">{property.price}</h3>
+                        <h3 className="text-2xl font-bold text-[#134e4a]">
+                            {property.priceMin < property.priceMax
+                                ? `$${property.priceMin.toLocaleString()} - $${property.priceMax.toLocaleString()}`
+                                : property.price}
+                        </h3>
                         <p className="text-sm text-gray-500 font-medium">{property.beds} • {property.baths}</p>
                     </div>
-                    {property.rating && (
-                        <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded-md">
-                            <Star className="w-3 h-3 text-[#134e4a] fill-[#134e4a]" />
-                            <span className="text-xs font-bold text-[#134e4a]">{property.rating}</span>
-                        </div>
-                    )}
+                    <div className="flex flex-col items-end gap-1">
+                        {property.rating && (
+                            <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded-md">
+                                <Star className="w-3 h-3 text-[#134e4a] fill-[#134e4a]" />
+                                <span className="text-xs font-bold text-[#134e4a]">{property.rating}</span>
+                            </div>
+                        )}
+                        {property.unitsAvailable && property.unitsAvailable > 0 && (
+                            <div className="flex items-center gap-1 bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">
+                                {property.unitsAvailable} Units Left
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <h4 className="font-bold text-gray-900 text-lg truncate">{property.address}</h4>
@@ -160,7 +171,14 @@ export const PropertyCard = ({ property, onMouseEnter, onMouseLeave, onClick }: 
 
                     <div className="flex gap-1.5">
                         {/* Compare Button */}
-                        <button
+                        {/* Compare Button */}
+                        <motion.button
+                            whileTap={{ scale: 0.8 }}
+                            animate={{
+                                scale: inCompare ? 1.1 : 1,
+                                rotate: inCompare ? 360 : 0
+                            }}
+                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 if (inCompare) {
@@ -170,15 +188,15 @@ export const PropertyCard = ({ property, onMouseEnter, onMouseLeave, onClick }: 
                                 }
                             }}
                             className={cn(
-                                "p-2 rounded-full transition-colors btn-press",
+                                "p-2 rounded-full transition-colors",
                                 inCompare
-                                    ? "bg-[#134e4a] text-white"
+                                    ? "bg-[#134e4a] text-white shadow-md relative z-10"
                                     : "text-gray-400 hover:text-[#134e4a] hover:bg-green-50"
                             )}
                             title={inCompare ? "Remove from compare" : "Add to compare"}
                         >
                             <GitCompare className="w-4 h-4" />
-                        </button>
+                        </motion.button>
 
                         {/* Share Button */}
                         <button

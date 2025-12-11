@@ -1,14 +1,37 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Filter, ChevronDown, X, Menu, Search } from 'lucide-react';
+import { MapPin, Filter, ChevronDown, X, Menu, Search, GitCompare } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
+import { useCompare } from '../hooks/useCompare';
 import { RoleSwitcher } from './RoleSwitcher';
+
+const CompareIndicator = () => {
+    const { compareList, setDrawerOpen } = useCompare();
+
+    if (compareList.length === 0) return null;
+
+    return (
+        <button
+            onClick={() => setDrawerOpen(true)}
+            className="hidden md:flex items-center gap-2 text-sm font-semibold text-[#134e4a] hover:bg-[#134e4a]/5 px-3 py-2 rounded-lg transition-colors btn-press"
+        >
+            <div className="relative">
+                <GitCompare className="w-5 h-5" />
+                <span className="absolute -top-2 -right-2 w-4 h-4 bg-orange-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
+                    {compareList.length}
+                </span>
+            </div>
+            Compare
+        </button>
+    );
+};
 
 export interface FilterState {
     priceRange: [number, number] | null;
     beds: number | null; // null = any, 0 = studio, 1+ = beds
     petsAllowed: boolean | null;
+    amenities: string[] | null;
 }
 
 interface HeaderProps {
@@ -31,6 +54,17 @@ const BEDS_OPTIONS = [
     { label: '1+ Bed', value: 1 },
     { label: '2+ Beds', value: 2 },
     { label: '3+ Beds', value: 3 },
+];
+
+const AMENITY_OPTIONS = [
+    { label: 'Pool', value: 'Pool' },
+    { label: 'Gym', value: 'Gym' },
+    { label: 'In-unit W/D', value: 'In-unit W/D' },
+    { label: 'Air Conditioning', value: 'Air Conditioning' },
+    { label: 'Parking', value: 'Parking' },
+    { label: 'Dishwasher', value: 'Dishwasher' },
+    { label: 'Concierge', value: 'Concierge' },
+    { label: 'Rooftop Lounge', value: 'Rooftop' },
 ];
 
 // Role-based navigation actions component
@@ -198,6 +232,16 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
         setOpenDropdown(null);
     };
 
+    const toggleAmenity = (amenity: string) => {
+        if (!onFilterChange || !filters) return;
+        const currentAmenities = filters.amenities || [];
+        if (currentAmenities.includes(amenity)) {
+            onFilterChange({ ...filters, amenities: currentAmenities.filter(a => a !== amenity) });
+        } else {
+            onFilterChange({ ...filters, amenities: [...currentAmenities, amenity] });
+        }
+    };
+
     const getPriceLabel = () => {
         if (!filters?.priceRange) return 'Any';
         const [min, max] = filters.priceRange;
@@ -211,12 +255,17 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
         return `${filters.beds}+ Beds`;
     };
 
-    const hasActiveFilters = filters && (filters.priceRange || filters.beds !== null || filters.petsAllowed);
-    const activeFilterCount = [filters?.priceRange, filters?.beds !== null && filters?.beds !== undefined ? true : null, filters?.petsAllowed].filter(Boolean).length;
+    const hasActiveFilters = filters && (filters.priceRange || filters.beds !== null || filters.petsAllowed || (filters.amenities && filters.amenities.length > 0));
+    const activeFilterCount = [
+        filters?.priceRange,
+        filters?.beds !== null && filters?.beds !== undefined ? true : null,
+        filters?.petsAllowed,
+        filters?.amenities && filters.amenities.length > 0 ? true : null
+    ].filter(Boolean).length;
 
     const clearFilters = () => {
         if (onFilterChange) {
-            onFilterChange({ priceRange: null, beds: null, petsAllowed: null });
+            onFilterChange({ priceRange: null, beds: null, petsAllowed: null, amenities: null });
         }
     };
 
@@ -263,6 +312,11 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
 
                     {/* Nav Actions */}
                     <NavActions />
+
+                    <div className="hidden md:block h-6 w-px bg-gray-200 mx-2 flex-shrink-0"></div>
+
+                    {/* Comparison Indicator */}
+                    <CompareIndicator />
                 </div>
 
                 {/* Mobile Search Bar */}
@@ -360,7 +414,58 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                     </button>
 
                     <FilterButton label="Move-In Date" />
-                    <FilterButton label="More" icon={Filter} badge={activeFilterCount > 0 ? activeFilterCount : undefined} />
+
+                    {/* More Filters */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setOpenDropdown(openDropdown === 'more' ? null : 'more')}
+                            className={cn(
+                                "flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all whitespace-nowrap btn-press relative",
+                                filters?.amenities && filters.amenities.length > 0
+                                    ? "bg-[#134e4a]/10 border-[#134e4a] text-[#134e4a]"
+                                    : "bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                            )}
+                        >
+                            <Filter className="w-3.5 h-3.5" />
+                            More
+                            <ChevronDown className={cn("w-3.5 h-3.5 opacity-50 transition-transform", openDropdown === 'more' && "rotate-180")} />
+                            {filters?.amenities && filters.amenities.length > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#134e4a] text-white text-[10px] font-bold rounded-full flex items-center justify-center filter-active-dot">
+                                    {filters.amenities.length}
+                                </span>
+                            )}
+                        </button>
+
+                        {/* More Filters Dropdown */}
+                        {openDropdown === 'more' && (
+                            <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-4 min-w-[280px] z-50 p-4">
+                                <h4 className="font-bold text-gray-900 mb-3 text-sm">Amenities</h4>
+                                <div className="space-y-2">
+                                    {AMENITY_OPTIONS.map(amenity => (
+                                        <label key={amenity.value} className="flex items-center gap-2 cursor-pointer group">
+                                            <div className="relative flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={filters?.amenities?.includes(amenity.value) || false}
+                                                    onChange={() => toggleAmenity(amenity.value)}
+                                                    className="w-4 h-4 border-gray-300 rounded text-[#134e4a] focus:ring-[#134e4a]"
+                                                />
+                                            </div>
+                                            <span className="text-sm text-gray-600 group-hover:text-gray-900">{amenity.label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+                                    <button
+                                        onClick={() => setOpenDropdown(null)}
+                                        className="text-xs font-bold text-[#134e4a] hover:underline"
+                                    >
+                                        Done
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     <div className="h-6 w-px bg-gray-200 mx-2 flex-shrink-0"></div>
 
@@ -378,6 +483,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                     </button>
                 </div>
             </header>
+
 
             {/* Mobile Menu Overlay */}
             {mobileMenuOpen && (

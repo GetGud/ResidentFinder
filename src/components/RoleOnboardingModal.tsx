@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Building2, Users, X } from 'lucide-react';
+import { Home, Building2, Layers, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { cn } from '../lib/utils';
 
 interface RoleOnboardingModalProps {
     isOpen: boolean;
@@ -10,15 +11,17 @@ interface RoleOnboardingModalProps {
 
 export const RoleOnboardingModal = ({ isOpen, onClose }: RoleOnboardingModalProps) => {
     const { setRole, enableManagerRole, setOnboardingComplete } = useAuth();
+    const [selected, setSelected] = React.useState<'renter' | 'manager' | 'both' | null>(null);
 
-    const handleSelectRole = (selectedRole: 'renter' | 'manager' | 'both') => {
-        if (selectedRole === 'renter') {
+    const handleConfirm = () => {
+        if (!selected) return;
+
+        if (selected === 'renter') {
             setRole('renter');
-        } else if (selectedRole === 'manager') {
+        } else if (selected === 'manager') {
             setRole('manager');
             enableManagerRole();
         } else {
-            // Both roles - start with renter view but enable manager
             setRole('renter');
             enableManagerRole();
         }
@@ -33,77 +36,74 @@ export const RoleOnboardingModal = ({ isOpen, onClose }: RoleOnboardingModalProp
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
                 >
-                    {/* Backdrop */}
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-
-                    {/* Modal */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden flex flex-col md:flex-row"
                     >
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-[#134e4a] to-[#0f3f3c] p-6 text-white">
-                            <h2 className="text-2xl font-bold">Welcome to ResidentFinder! 🏠</h2>
-                            <p className="text-emerald-100 mt-1">Let's personalize your experience</p>
+                        {/* Side Branding Panel (hidden on mobile) */}
+                        <div className="hidden md:flex flex-col justify-between w-1/3 bg-[#134e4a] p-8 text-white">
+                            <div>
+                                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center mb-6">
+                                    <span className="font-bold text-xl">R</span>
+                                </div>
+                                <h2 className="text-2xl font-bold mb-2">Welcome to ResidentFinder</h2>
+                                <p className="text-emerald-100/80 text-sm leading-relaxed">
+                                    Join thousands of users finding their dream home or managing their properties with ease.
+                                </p>
+                            </div>
+                            <div className="text-xs text-emerald-100/60">
+                                © 2025 ResidentFinder
+                            </div>
                         </div>
 
-                        {/* Options */}
-                        <div className="p-6 space-y-4">
-                            <p className="text-gray-600 text-center mb-6">What brings you here today?</p>
+                        {/* Main Content */}
+                        <div className="flex-1 p-8">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">How will you use ResidentFinder?</h3>
+                            <p className="text-gray-500 mb-8 text-sm">Select the option that best describes your needs immediately. You can adjust this later.</p>
 
-                            {/* Renter Option */}
-                            <button
-                                onClick={() => handleSelectRole('renter')}
-                                className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-[#134e4a] hover:bg-[#f0fdf4] transition-all group text-left flex items-start gap-4"
-                            >
-                                <div className="p-3 rounded-lg bg-blue-100 text-blue-600 group-hover:bg-[#134e4a] group-hover:text-white transition-colors">
-                                    <Home size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900">I'm looking for a place</h3>
-                                    <p className="text-sm text-gray-500 mt-1">Search apartments, schedule tours, save favorites</p>
-                                </div>
-                            </button>
+                            <div className="space-y-3">
+                                <RoleOption
+                                    icon={Home}
+                                    title="I am a Renter"
+                                    description="Looking for an apartment or home to rent"
+                                    isSelected={selected === 'renter'}
+                                    onClick={() => setSelected('renter')}
+                                />
+                                <RoleOption
+                                    icon={Building2}
+                                    title="I am a Property Manager"
+                                    description="Listing properties and managing tenants"
+                                    isSelected={selected === 'manager'}
+                                    onClick={() => setSelected('manager')}
+                                />
+                                <RoleOption
+                                    icon={Layers}
+                                    title="I do both"
+                                    description="I want to browse listings and manage my own"
+                                    isSelected={selected === 'both'}
+                                    onClick={() => setSelected('both')}
+                                />
+                            </div>
 
-                            {/* Manager Option */}
-                            <button
-                                onClick={() => handleSelectRole('manager')}
-                                className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-[#134e4a] hover:bg-[#f0fdf4] transition-all group text-left flex items-start gap-4"
-                            >
-                                <div className="p-3 rounded-lg bg-purple-100 text-purple-600 group-hover:bg-[#134e4a] group-hover:text-white transition-colors">
-                                    <Building2 size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900">I manage properties</h3>
-                                    <p className="text-sm text-gray-500 mt-1">List rentals, manage tenants, track leads</p>
-                                </div>
-                            </button>
-
-                            {/* Both Option */}
-                            <button
-                                onClick={() => handleSelectRole('both')}
-                                className="w-full p-4 rounded-xl border-2 border-gray-200 hover:border-[#134e4a] hover:bg-[#f0fdf4] transition-all group text-left flex items-start gap-4"
-                            >
-                                <div className="p-3 rounded-lg bg-amber-100 text-amber-600 group-hover:bg-[#134e4a] group-hover:text-white transition-colors">
-                                    <Users size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900">Both</h3>
-                                    <p className="text-sm text-gray-500 mt-1">I'm looking for a place AND manage properties</p>
-                                </div>
-                            </button>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="px-6 pb-6">
-                            <p className="text-xs text-gray-400 text-center">
-                                You can always switch roles later from your dashboard
-                            </p>
+                            <div className="mt-8 flex justify-end">
+                                <button
+                                    onClick={handleConfirm}
+                                    disabled={!selected}
+                                    className={cn(
+                                        "px-6 py-2.5 rounded-lg font-semibold text-sm transition-all",
+                                        selected
+                                            ? "bg-[#134e4a] text-white shadow-lg shadow-emerald-900/10 hover:shadow-emerald-900/20 hover:-translate-y-0.5"
+                                            : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    )}
+                                >
+                                    Continue
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
                 </motion.div>
@@ -111,5 +111,43 @@ export const RoleOnboardingModal = ({ isOpen, onClose }: RoleOnboardingModalProp
         </AnimatePresence>
     );
 };
+
+const RoleOption = ({ icon: Icon, title, description, isSelected, onClick }: {
+    icon: any,
+    title: string,
+    description: string,
+    isSelected: boolean,
+    onClick: () => void
+}) => (
+    <button
+        onClick={onClick}
+        className={cn(
+            "w-full p-4 rounded-xl border text-left transition-all duration-200 flex items-start gap-4 group relative",
+            isSelected
+                ? "border-[#134e4a] bg-[#f0fdf4] shadow-sm"
+                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+        )}
+    >
+        <div className={cn(
+            "p-2.5 rounded-lg transition-colors",
+            isSelected ? "bg-[#134e4a] text-white" : "bg-gray-100 text-gray-500 group-hover:bg-gray-200"
+        )}>
+            <Icon size={20} />
+        </div>
+        <div className="flex-1">
+            <h4 className={cn("font-semibold text-sm", isSelected ? "text-[#134e4a]" : "text-gray-900")}>
+                {title}
+            </h4>
+            <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+        </div>
+        {isSelected && (
+            <div className="absolute top-4 right-4">
+                <div className="w-5 h-5 bg-[#134e4a] rounded-full flex items-center justify-center">
+                    <Check size={12} className="text-white" />
+                </div>
+            </div>
+        )}
+    </button>
+);
 
 export default RoleOnboardingModal;

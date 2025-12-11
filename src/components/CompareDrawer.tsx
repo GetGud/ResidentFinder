@@ -18,11 +18,16 @@ export function CompareDrawer() {
                         initial={{ y: 100 }}
                         animate={{ y: 0 }}
                         exit={{ y: 100 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => setDrawerOpen(true)}
-                        className="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 bg-[#134e4a] text-white px-6 py-3 rounded-t-xl shadow-lg flex items-center gap-2 font-semibold"
+                        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-[#134e4a] to-[#0f3f3c] text-white px-8 py-3.5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center gap-3 font-bold border-2 border-white/20 backdrop-blur-md hover:shadow-2xl transition-all"
                     >
-                        <ChevronUp className="w-4 h-4" />
-                        Compare ({compareList.length}/3)
+                        <ChevronUp className="w-5 h-5" />
+                        <span>Compare Properties</span>
+                        <span className="bg-white/20 px-2 py-0.5 rounded text-sm min-w-[24px] text-center">
+                            {compareList.length}
+                        </span>
                     </motion.button>
                 )}
             </AnimatePresence>

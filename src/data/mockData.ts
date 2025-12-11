@@ -24,8 +24,10 @@ export const MOCK_PROPERTIES: Property[] = [
         reviewCount: 124,
         availability: 'Available Now',
         tags: ['Rooftop Lounge', 'In-unit W/D', 'Gym'],
+        amenities: ['Rooftop Lounge', 'In-unit W/D', 'Gym', 'Parking', 'Concierge'],
+        unitsAvailable: 8,
         petsAllowed: true,
-        coordinates: { x: 30, y: 40 },
+        coordinates: { lat: 47.6101, lng: -122.3421 }, // Downtown/Belltown
         floorPlans: [
             {
                 id: 'fp1',
@@ -136,8 +138,10 @@ export const MOCK_PROPERTIES: Property[] = [
         reviewCount: 89,
         availability: 'Available Now',
         tags: ['Pet Friendly', 'Parking'],
+        amenities: ['Pet Friendly', 'Parking', 'Dishwasher'],
+        unitsAvailable: 3,
         petsAllowed: true,
-        coordinates: { x: 55, y: 25 }
+        coordinates: { lat: 47.6152, lng: -122.3210 }
     },
     {
         id: '3',
@@ -160,8 +164,10 @@ export const MOCK_PROPERTIES: Property[] = [
         reviewCount: 210,
         availability: 'Apr 1',
         tags: ['Water View', 'Pool', 'Concierge'],
+        amenities: ['Water View', 'Pool', 'Concierge', 'Gym', 'Parking', 'Air Conditioning'],
+        unitsAvailable: 12,
         petsAllowed: false,
-        coordinates: { x: 20, y: 60 }
+        coordinates: { lat: 47.6130, lng: -122.3480 }
     },
     {
         id: '4',
@@ -182,8 +188,10 @@ export const MOCK_PROPERTIES: Property[] = [
         reviewCount: 45,
         availability: 'Available Now',
         tags: ['Historic', 'Walkable'],
+        amenities: ['Historic', 'Walkable', 'Laundry on-site'],
+        unitsAvailable: 1,
         petsAllowed: false,
-        coordinates: { x: 70, y: 35 }
+        coordinates: { lat: 47.6680, lng: -122.3850 }
     },
     {
         id: '5',
@@ -205,8 +213,10 @@ export const MOCK_PROPERTIES: Property[] = [
         reviewCount: 156,
         availability: 'May 1',
         tags: ['Modern', 'Smart Home'],
+        amenities: ['Modern', 'Smart Home', 'In-unit W/D', 'Rooftop Lounge'],
+        unitsAvailable: 5,
         petsAllowed: true,
-        coordinates: { x: 45, y: 55 }
+        coordinates: { lat: 47.6250, lng: -122.3560 }
     },
     {
         id: '6',
@@ -229,8 +239,10 @@ export const MOCK_PROPERTIES: Property[] = [
         reviewCount: 12,
         availability: 'Available Now',
         tags: ['Luxury', 'Private Elevator'],
+        amenities: ['Luxury', 'Private Elevator', 'Concierge', 'Air Conditioning', 'Pool', 'Gym'],
+        unitsAvailable: 1,
         petsAllowed: true,
-        coordinates: { x: 40, y: 50 }
+        coordinates: { lat: 47.6050, lng: -122.3320 }
     }
 ];
 
@@ -238,7 +250,7 @@ export const MOCK_PROPERTIES: Property[] = [
 export const MOCK_SAVED_PROPERTIES = MOCK_PROPERTIES.slice(0, 4).map((p, i) => ({
     ...p,
     savedDate: ['2 days ago', '1 week ago', '3 days ago', 'Yesterday'][i],
-    priceChange: i === 2 ? { from: '$3,400', to: '$3,100', date: 'Price dropped 2 days ago' } : null
+    priceChange: i === 2 ? { from: '$3,400', to: '$3,100', amount: '$300', date: 'Price dropped 2 days ago' } : null
 }));
 
 // Tours data
@@ -253,7 +265,8 @@ export const MOCK_TOURS: Tour[] = [
         time: '10:00 AM',
         type: 'In-Person',
         status: 'upcoming',
-        agent: 'Sarah Miller'
+        agent: 'Sarah Miller',
+        price: '$2,450'
     },
     {
         id: '2',
@@ -265,7 +278,8 @@ export const MOCK_TOURS: Tour[] = [
         time: '2:30 PM',
         type: 'Video',
         status: 'upcoming',
-        agent: 'Michael Chen'
+        agent: 'Michael Chen',
+        price: '$3,100'
     },
     {
         id: '3',
@@ -278,7 +292,8 @@ export const MOCK_TOURS: Tour[] = [
         type: 'In-Person',
         status: 'completed',
         agent: 'Emily Davis',
-        notes: 'Great natural light, loved the rooftop!'
+        notes: 'Great natural light, loved the rooftop!',
+        price: '$1,850'
     },
     {
         id: '4',
@@ -289,7 +304,8 @@ export const MOCK_TOURS: Tour[] = [
         date: 'Nov 20',
         time: '3:00 PM',
         type: 'Self-Guided',
-        status: 'completed'
+        status: 'completed',
+        price: '$1,650'
     }
 ];
 
@@ -404,7 +420,7 @@ export const MOCK_STAYS: Stay[] = [
         baths: 1,
         amenities: ['WiFi', 'Kitchen', 'Washer', 'Free parking'],
         host: { name: 'Jennifer', isSuperhost: true },
-        coordinates: { x: 45, y: 30 }
+        coordinates: { lat: 47.6180, lng: -122.3150 }
     },
     {
         id: '2',
@@ -423,7 +439,7 @@ export const MOCK_STAYS: Stay[] = [
         baths: 1,
         amenities: ['WiFi', 'Kitchen', 'Gym', 'City view', 'Self check-in'],
         host: { name: 'Marcus', isSuperhost: true },
-        coordinates: { x: 30, y: 45 }
+        coordinates: { lat: 47.6080, lng: -122.3350 }
     },
     {
         id: '3',
@@ -442,7 +458,7 @@ export const MOCK_STAYS: Stay[] = [
         baths: 1,
         amenities: ['WiFi', 'Breakfast', 'Free parking', 'Water view'],
         host: { name: 'David & Lisa', isSuperhost: true },
-        coordinates: { x: 65, y: 25 }
+        coordinates: { lat: 47.6700, lng: -122.3800 }
     },
     {
         id: '4',
@@ -461,7 +477,7 @@ export const MOCK_STAYS: Stay[] = [
         baths: 1,
         amenities: ['WiFi', 'Kitchen', 'Patio', 'Pet friendly'],
         host: { name: 'Rachel', isSuperhost: false },
-        coordinates: { x: 40, y: 55 }
+        coordinates: { lat: 47.6350, lng: -122.3600 }
     }
 ];
 
@@ -482,7 +498,7 @@ export const MOCK_BUY_PROPERTIES: BuyProperty[] = [
         lotSize: '5,200 sqft',
         status: 'Active',
         openHouse: 'Sat, Dec 7, 1-4 PM',
-        coordinates: { x: 50, y: 35 }
+        coordinates: { lat: 47.6140, lng: -122.3100 }
     },
     {
         id: '2',
@@ -497,7 +513,7 @@ export const MOCK_BUY_PROPERTIES: BuyProperty[] = [
         type: 'Condo',
         yearBuilt: 2018,
         status: 'Active',
-        coordinates: { x: 25, y: 50 }
+        coordinates: { lat: 47.6130, lng: -122.3450 }
     },
     {
         id: '3',
@@ -512,7 +528,7 @@ export const MOCK_BUY_PROPERTIES: BuyProperty[] = [
         type: 'Townhome',
         yearBuilt: 2015,
         status: 'Pending',
-        coordinates: { x: 60, y: 20 }
+        coordinates: { lat: 47.6620, lng: -122.3500 }
     },
     {
         id: '4',
@@ -528,7 +544,7 @@ export const MOCK_BUY_PROPERTIES: BuyProperty[] = [
         yearBuilt: 2020,
         lotSize: '7,500 sqft',
         status: 'Active',
-        coordinates: { x: 15, y: 70 }
+        coordinates: { lat: 47.5750, lng: -122.4080 }
     }
 ];
 

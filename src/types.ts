@@ -19,7 +19,9 @@ export interface Property {
   availability: 'Available Now' | 'Apr 1' | 'May 1';
   tags: string[];
   petsAllowed: boolean; // For filtering
-  coordinates: { x: number; y: number }; // For map simulation
+  amenities?: string[]; // For detailed filtering (Pool, Gym, etc)
+  unitsAvailable?: number; // For card display
+  coordinates: { lat: number; lng: number }; // Real map coordinates
   virtualTourUrl?: string; // For 3D virtual tour integration
   // Extended details
   floorPlans?: FloorPlan[];
@@ -85,6 +87,7 @@ export interface Tour {
   status: 'upcoming' | 'completed' | 'cancelled';
   agent?: string;
   notes?: string;
+  price: string;
 }
 
 export interface Application {
@@ -128,7 +131,7 @@ export interface Stay {
   baths: number;
   amenities: string[];
   host: { name: string; isSuperhost: boolean };
-  coordinates: { x: number; y: number };
+  coordinates: { lat: number; lng: number };
 }
 
 export interface BuyProperty {
@@ -146,5 +149,5 @@ export interface BuyProperty {
   lotSize?: string;
   status: 'Active' | 'Pending' | 'Sold';
   openHouse?: string;
-  coordinates: { x: number; y: number };
+  coordinates: { lat: number; lng: number };
 }

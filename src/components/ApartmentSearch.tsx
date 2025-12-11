@@ -1,13 +1,99 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Maximize, CheckCircle2, ChevronDown } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, useMap, Tooltip } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
 import { Header, FilterState } from './Header';
 import { PropertyCard } from './PropertyCard';
-import { MapMarker } from './MapMarker';
 import { PropertyDetailsModal } from './PropertyDetailsModal';
 import { PropertyCardSkeleton } from './Skeleton';
 import { MOCK_PROPERTIES } from '../data/mockData';
 import { Property } from '../types';
 import { cn } from '../lib/utils';
+
+// Fix for default Leaflet markers
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+// Custom Marker Component
+const CustomMarker = ({
+    property,
+    isHovered,
+    onClick,
+    onHoverStart,
+    onHoverEnd
+}: {
+    property: Property;
+    isHovered: boolean;
+    onClick: () => void;
+    onHoverStart: () => void;
+    onHoverEnd: () => void;
+}) => {
+    const map = useMap();
+    const priceDisplay = property.price.split(' ')[0].replace('+', '');
+
+    // Fly to marker when hovered from list
+    useEffect(() => {
+        if (isHovered) {
+            map.flyTo([property.coordinates.lat, property.coordinates.lng], 15, { duration: 0.5 });
+        }
+    }, [isHovered, map, property]);
+
+    return (
+        <Marker
+            position={[property.coordinates.lat, property.coordinates.lng]}
+            opacity={0} // Hide default marker, show tooltip as the marker
+            eventHandlers={{
+                click: onClick,
+                mouseover: onHoverStart,
+                mouseout: onHoverEnd
+            }}
+        >
+            <Tooltip
+                permanent
+                direction="center"
+                className="bg-transparent border-none shadow-none p-0 !bg-transparent !border-0 before:!hidden"
+                offset={[0, 0]}
+            >
+                <div className="relative pointer-events-auto">
+                    {/* Price Bubble */}
+                    <div
+                        className={cn(
+                            "px-3 py-1.5 rounded-full shadow-lg font-bold text-sm transition-all duration-200 transform cursor-pointer",
+                            isHovered
+                                ? 'bg-[#134e4a] text-white scale-110 -translate-y-1 z-[1000]'
+                                : 'bg-white text-[#134e4a] border border-gray-200 hover:scale-105'
+                        )}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onClick();
+                        }}
+                    >
+                        {priceDisplay}
+                        {/* Arrow */}
+                        <div
+                            className={cn(
+                                "absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent",
+                                isHovered
+                                    ? 'border-t-[6px] border-t-[#134e4a]'
+                                    : 'border-t-[6px] border-t-white'
+                            )}
+                        />
+                        {/* New listing indicator dot */}
+                        {property.isNew && !isHovered && (
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border border-white" />
+                        )}
+                    </div>
+                </div>
+            </Tooltip>
+        </Marker>
+    );
+};
 
 export function ApartmentSearch() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -18,7 +104,8 @@ export function ApartmentSearch() {
     const [filters, setFilters] = useState<FilterState>({
         priceRange: null,
         beds: null,
-        petsAllowed: null
+        petsAllowed: null,
+        amenities: null
     });
     const propertyRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -60,6 +147,15 @@ export function ApartmentSearch() {
                 if (!p.petsAllowed) return false;
             }
 
+            // Amenities filter
+            if (filters.amenities && filters.amenities.length > 0) {
+                const propertyAmenities = p.amenities || p.tags || [];
+                const hasAllAmenities = filters.amenities.every(amenity =>
+                    propertyAmenities.some(pa => pa.toLowerCase().includes(amenity.toLowerCase()))
+                );
+                if (!hasAllAmenities) return false;
+            }
+
             return true;
         });
     }, [searchQuery, filters]);
@@ -72,6 +168,8 @@ export function ApartmentSearch() {
         }
     }, []);
 
+    const seattleCenter = { lat: 47.6062, lng: -122.3321 };
+
     return (
         <div className="flex flex-col h-screen bg-white font-sans text-gray-900">
             <style>{`
@@ -79,6 +177,13 @@ export function ApartmentSearch() {
         .font-sans { font-family: 'Manrope', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Override Leaflet Tooltip styles */
+        .leaflet-tooltip { 
+            background: transparent !important; 
+            border: none !important; 
+            box-shadow: none !important; 
+            padding: 0 !important;
+        }
       `}</style>
 
             <Header
@@ -112,7 +217,6 @@ export function ApartmentSearch() {
                     {/* Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 md:px-6 pb-10">
                         {isLoading ? (
-                            // Loading skeletons
                             <>
                                 <PropertyCardSkeleton />
                                 <PropertyCardSkeleton />
@@ -127,7 +231,7 @@ export function ApartmentSearch() {
                                         ref={(el) => propertyRefs.current[property.id] = el}
                                         className={cn(
                                             "transition-all duration-200 rounded-xl",
-                                            mapHoveredPropertyId === property.id && "hover-synced"
+                                            mapHoveredPropertyId === property.id && "ring-2 ring-[#134e4a] bg-[#134e4a]/5"
                                         )}
                                     >
                                         <PropertyCard
@@ -150,7 +254,7 @@ export function ApartmentSearch() {
                         )}
                     </div>
 
-                    {/* Pagination (Static for now) */}
+
                     {!isLoading && filteredProperties.length > 0 && (
                         <div className="p-6 flex justify-center border-t border-gray-200 bg-white">
                             <div className="flex items-center gap-2">
@@ -168,87 +272,50 @@ export function ApartmentSearch() {
                         </div>
                     )}
 
-                    {/* Footer Simple */}
+                    {/* Footer Simplified */}
                     <div className="bg-gray-100 p-8 text-center">
                         <p className="text-gray-500 text-sm">© 2024 ResidentFinder. All rights reserved.</p>
-                        <div className="flex justify-center gap-4 mt-2 text-sm text-gray-400">
-                            <a href="#" className="hover:underline">Privacy</a>
-                            <a href="#" className="hover:underline">Terms</a>
-                            <a href="#" className="hover:underline">Sitemap</a>
-                        </div>
                     </div>
                 </div>
 
                 {/* Map View - Right Panel */}
-                <div className="hidden lg:block w-[45%] xl:w-[40%] h-full relative bg-[#e5e7eb]">
-                    {/* Simulated Map Background */}
-                    <div className="absolute inset-0 bg-[#cad2d3] overflow-hidden">
-                        {/* Map Texture / Grid */}
-                        <div className="absolute inset-0 opacity-40"
-                            style={{
-                                backgroundImage: 'radial-gradient(#a0aec0 1px, transparent 1px)',
-                                backgroundSize: '20px 20px'
-                            }}>
-                        </div>
+                <div className="hidden lg:block w-[45%] xl:w-[40%] h-full relative z-0">
+                    {!isLoading && (
+                        <MapContainer
+                            key="leaflet-map-container"
+                            center={[seattleCenter.lat, seattleCenter.lng]}
+                            zoom={13}
+                            scrollWheelZoom={true}
+                            className="w-full h-full"
+                        >
+                            <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
 
-                        {/* Decorative Map Elements (Roads/Blocks) */}
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M -100 100 L 800 150" stroke="white" strokeWidth="12" fill="none" />
-                            <path d="M 200 -50 L 250 900" stroke="white" strokeWidth="16" fill="none" />
-                            <path d="M 500 0 L 400 800" stroke="white" strokeWidth="10" fill="none" />
-                            <path d="M 0 400 L 900 350" stroke="white" strokeWidth="14" fill="none" />
+                            {filteredProperties.map((p) => (
+                                <CustomMarker
+                                    key={p.id}
+                                    property={p}
+                                    isHovered={activeHoveredId === p.id}
+                                    onClick={() => setSelectedProperty(p)}
+                                    onHoverStart={() => {
+                                        setMapHoveredPropertyId(p.id);
+                                        scrollToCard(p.id);
+                                    }}
+                                    onHoverEnd={() => setMapHoveredPropertyId(null)}
+                                />
+                            ))}
+                        </MapContainer>
+                    )}
 
-                            <rect x="260" y="160" width="100" height="80" fill="#d1d5db" />
-                            <rect x="380" y="200" width="60" height="120" fill="#d1d5db" />
-                            <circle cx="600" cy="500" r="80" fill="#d4d4d8" />
-                        </svg>
-
-                        {/* Water Feature */}
-                        <div className="absolute -left-20 top-1/3 w-64 h-64 bg-[#bfdbfe] rounded-full blur-3xl opacity-60 pointer-events-none"></div>
-                    </div>
-
-                    {/* Map Controls */}
-                    <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
-                        <button className="w-10 h-10 bg-white rounded-lg shadow-md flex items-center justify-center text-gray-600 hover:text-[#134e4a] transition-colors">
-                            <Maximize className="w-5 h-5" />
-                        </button>
-                        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                            <button className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 border-b border-gray-100">
-                                <span className="text-xl font-bold">+</span>
-                            </button>
-                            <button className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50">
-                                <span className="text-xl font-bold">-</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Draw Tool */}
-                    <div className="absolute top-4 left-4 z-20">
+                    {/* Map Overlays (Draw Area, etc) */}
+                    <div className="absolute top-4 left-4 z-[400]">
                         <button className="bg-white px-4 py-2 rounded-lg shadow-md flex items-center gap-2 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
                             <CheckCircle2 className="w-4 h-4 text-[#134e4a]" />
                             Draw Area
                         </button>
                     </div>
-
-                    {/* Markers */}
-                    {!isLoading && filteredProperties.map((p) => (
-                        <MapMarker
-                            key={p.id}
-                            x={p.coordinates.x}
-                            y={p.coordinates.y}
-                            price={p.price}
-                            isHovered={activeHoveredId === p.id}
-                            isNew={p.isNew}
-                            imageUrl={p.images[0]}
-                            address={p.address}
-                            onClick={() => setSelectedProperty(p)}
-                            onHoverStart={() => {
-                                setMapHoveredPropertyId(p.id);
-                                scrollToCard(p.id);
-                            }}
-                            onHoverEnd={() => setMapHoveredPropertyId(null)}
-                        />
-                    ))}
                 </div>
             </main>
 
@@ -260,4 +327,3 @@ export function ApartmentSearch() {
         </div>
     );
 }
-
