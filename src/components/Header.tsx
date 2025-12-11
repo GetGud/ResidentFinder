@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Filter, ChevronDown, X, Menu, Search, GitCompare } from 'lucide-react';
+import { MapPin, Filter, ChevronDown, X, Menu, Search, GitCompare, Calendar, Users, Home } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../hooks/useCompare';
@@ -32,12 +32,20 @@ export interface FilterState {
     beds: number | null; // null = any, 0 = studio, 1+ = beds
     petsAllowed: boolean | null;
     amenities: string[] | null;
+    dates?: { start: Date | null; end: Date | null } | null;
+    minGuests?: number | null;
+    propertyType?: string[] | null; // For Buy mode (House, Condo, etc.)
+    status?: string[] | null; // For Buy mode (Active, Pending)
 }
+
+export type SearchMode = 'rent' | 'buy' | 'stays';
 
 interface HeaderProps {
     onSearch?: (query: string) => void;
     filters?: FilterState;
     onFilterChange?: (filters: FilterState) => void;
+    searchMode?: SearchMode;
+    onSearchModeChange?: (mode: SearchMode) => void;
 }
 
 const PRICE_OPTIONS = [
@@ -48,12 +56,36 @@ const PRICE_OPTIONS = [
     { label: '$4,000+', value: [4000, 99999] as [number, number] },
 ];
 
+const NIGHTLY_PRICE_OPTIONS = [
+    { label: 'Any Price', value: null },
+    { label: 'Under $100', value: [0, 100] as [number, number] },
+    { label: '$100 - $200', value: [100, 200] as [number, number] },
+    { label: '$200 - $300', value: [200, 300] as [number, number] },
+    { label: '$300+', value: [300, 9999] as [number, number] },
+];
+
 const BEDS_OPTIONS = [
     { label: 'Any Beds', value: null },
     { label: 'Studio', value: 0 },
     { label: '1+ Bed', value: 1 },
     { label: '2+ Beds', value: 2 },
     { label: '3+ Beds', value: 3 },
+];
+
+const GUEST_OPTIONS = [
+    { label: 'Any Guests', value: null },
+    { label: '1 Guest', value: 1 },
+    { label: '2 Guests', value: 2 },
+    { label: '3+ Guests', value: 3 },
+    { label: '4+ Guests', value: 4 },
+    { label: '5+ Guests', value: 5 },
+];
+
+const HOME_TYPE_OPTIONS = [
+    { label: 'House', value: 'House' },
+    { label: 'Condo', value: 'Condo' },
+    { label: 'Townhome', value: 'Townhome' },
+    { label: 'Multi-Family', value: 'Multi-Family' },
 ];
 
 const AMENITY_OPTIONS = [
@@ -65,6 +97,9 @@ const AMENITY_OPTIONS = [
     { label: 'Dishwasher', value: 'Dishwasher' },
     { label: 'Concierge', value: 'Concierge' },
     { label: 'Rooftop Lounge', value: 'Rooftop' },
+    { label: 'WiFi', value: 'WiFi' },
+    { label: 'Kitchen', value: 'Kitchen' },
+    { label: 'Self check-in', value: 'Self check-in' },
 ];
 
 // Role-based navigation actions component
@@ -209,7 +244,7 @@ const MobileNavMenu = ({ onClose }: { onClose: () => void }) => {
     );
 };
 
-export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
+export const Header = ({ onSearch, filters, onFilterChange, searchMode = 'rent', onSearchModeChange }: HeaderProps) => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -242,9 +277,23 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
         }
     };
 
+    const togglePropertyType = (type: string) => {
+        if (!onFilterChange || !filters) return;
+        const currentTypes = filters.propertyType || [];
+        if (currentTypes.includes(type)) {
+            onFilterChange({ ...filters, propertyType: currentTypes.filter(t => t !== type) });
+        } else {
+            onFilterChange({ ...filters, propertyType: [...currentTypes, type] });
+        }
+    };
+
     const getPriceLabel = () => {
         if (!filters?.priceRange) return 'Any';
         const [min, max] = filters.priceRange;
+        if (searchMode === 'stays') {
+            if (max >= 9999) return `$${min}+`;
+            return `$${min} - $${max}`;
+        }
         if (max >= 99999) return `$${(min / 1000).toFixed(1)}k+`;
         return `$${(min / 1000).toFixed(1)}k - $${(max / 1000).toFixed(1)}k`;
     };
@@ -253,6 +302,17 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
         if (filters?.beds === null || filters?.beds === undefined) return 'Any';
         if (filters.beds === 0) return 'Studio';
         return `${filters.beds}+ Beds`;
+    };
+
+    const getGuestsLabel = () => {
+        if (filters?.minGuests === null || filters?.minGuests === undefined) return 'Any';
+        return `${filters.minGuests} Guests`;
+    };
+
+    const getPropertyTypeLabel = () => {
+        if (!filters?.propertyType || filters.propertyType.length === 0) return 'Any';
+        if (filters.propertyType.length === 1) return filters.propertyType[0];
+        return `${filters.propertyType.length} Types`;
     };
 
     const hasActiveFilters = filters && (filters.priceRange || filters.beds !== null || filters.petsAllowed || (filters.amenities && filters.amenities.length > 0));
@@ -269,6 +329,8 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
         }
     };
 
+    const currentPriceOptions = searchMode === 'stays' ? NIGHTLY_PRICE_OPTIONS : PRICE_OPTIONS;
+
     return (
         <>
             <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm font-sans">
@@ -281,18 +343,53 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                         <Menu className="w-5 h-5" />
                     </button>
 
-                    {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2 flex-shrink-0 cursor-pointer">
-                        <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">R</span>
-                        </div>
-                        <span className="text-xl font-extrabold tracking-tight text-[#134e4a] hidden sm:block">
-                            Resident<span className="font-light text-gray-500">Finder</span>
-                        </span>
-                    </Link>
+                    {/* Logo & Mode Switcher */}
+                    <div className="flex items-center gap-8">
+                        <Link to="/" className="flex items-center gap-2 flex-shrink-0 cursor-pointer">
+                            <div className="w-8 h-8 bg-[#134e4a] rounded-lg flex items-center justify-center">
+                                <span className="text-white font-bold text-lg">R</span>
+                            </div>
+                            <span className="text-xl font-extrabold tracking-tight text-[#134e4a] hidden lg:block">
+                                Resident<span className="font-light text-gray-500">Finder</span>
+                            </span>
+                        </Link>
+
+                        {/* Mode Switcher */}
+                        {onSearchModeChange && (
+                            <div className="hidden md:flex bg-gray-100 p-1 rounded-lg">
+                                <button
+                                    onClick={() => onSearchModeChange('rent')}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-md text-sm font-semibold transition-all",
+                                        searchMode === 'rent' ? "bg-white text-[#134e4a] shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                    )}
+                                >
+                                    Rent
+                                </button>
+                                <button
+                                    onClick={() => onSearchModeChange('buy')}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-md text-sm font-semibold transition-all",
+                                        searchMode === 'buy' ? "bg-white text-[#134e4a] shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                    )}
+                                >
+                                    Buy
+                                </button>
+                                <button
+                                    onClick={() => onSearchModeChange('stays')}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-md text-sm font-semibold transition-all",
+                                        searchMode === 'stays' ? "bg-white text-[#134e4a] shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                    )}
+                                >
+                                    Stays
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Search Bar - Desktop */}
-                    <div className="flex-1 max-w-2xl relative hidden md:block">
+                    <div className="flex-1 max-w-xl relative hidden md:block">
                         <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <MapPin className="h-5 w-5 text-gray-400 group-focus-within:text-[#134e4a] transition-colors" />
@@ -300,8 +397,8 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                             <input
                                 type="text"
                                 className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-full leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#134e4a]/20 focus:border-[#134e4a] transition-all sm:text-sm"
-                                placeholder="City, Neighborhood, Zip, or Address"
-                                defaultValue="Seattle, WA"
+                                placeholder={searchMode === 'stays' ? "Destination, City, or Address" : "City, Neighborhood, Zip, or Address"}
+                                defaultValue=""
                                 onChange={(e) => onSearch?.(e.target.value)}
                             />
                             <button className="absolute inset-y-1 right-1 bg-[#134e4a] text-white px-4 rounded-full text-sm font-semibold hover:bg-[#0f3f3c] transition-colors btn-press">
@@ -351,7 +448,7 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                         </button>
                         {openDropdown === 'price' && (
                             <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[180px] z-50">
-                                {PRICE_OPTIONS.map(opt => (
+                                {currentPriceOptions.map(opt => (
                                     <button
                                         key={opt.label}
                                         onClick={() => handleFilterChange('priceRange', opt.value)}
@@ -367,53 +464,121 @@ export const Header = ({ onSearch, filters, onFilterChange }: HeaderProps) => {
                         )}
                     </div>
 
-                    {/* Beds Filter */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setOpenDropdown(openDropdown === 'beds' ? null : 'beds')}
-                            className={cn(
-                                "flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
-                                filters?.beds !== null && filters?.beds !== undefined
-                                    ? "bg-[#134e4a]/10 border-[#134e4a] text-[#134e4a]"
-                                    : "bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                    {/* Beds Filter - Rent & Buy Only */}
+                    {searchMode !== 'stays' && (
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'beds' ? null : 'beds')}
+                                className={cn(
+                                    "flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
+                                    filters?.beds !== null && filters?.beds !== undefined
+                                        ? "bg-[#134e4a]/10 border-[#134e4a] text-[#134e4a]"
+                                        : "bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                                )}
+                            >
+                                Beds
+                                <span className="text-[#134e4a] font-bold ml-1">{getBedsLabel()}</span>
+                                <ChevronDown className={cn("w-3.5 h-3.5 opacity-50 transition-transform", openDropdown === 'beds' && "rotate-180")} />
+                            </button>
+                            {openDropdown === 'beds' && (
+                                <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[140px] z-50">
+                                    {BEDS_OPTIONS.map(opt => (
+                                        <button
+                                            key={opt.label}
+                                            onClick={() => handleFilterChange('beds', opt.value)}
+                                            className={cn(
+                                                "w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors",
+                                                filters?.beds === opt.value && "bg-[#134e4a]/10 text-[#134e4a] font-medium"
+                                            )}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
                             )}
-                        >
-                            Beds
-                            <span className="text-[#134e4a] font-bold ml-1">{getBedsLabel()}</span>
-                            <ChevronDown className={cn("w-3.5 h-3.5 opacity-50 transition-transform", openDropdown === 'beds' && "rotate-180")} />
-                        </button>
-                        {openDropdown === 'beds' && (
-                            <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[140px] z-50">
-                                {BEDS_OPTIONS.map(opt => (
-                                    <button
-                                        key={opt.label}
-                                        onClick={() => handleFilterChange('beds', opt.value)}
-                                        className={cn(
-                                            "w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors",
-                                            filters?.beds === opt.value && "bg-[#134e4a]/10 text-[#134e4a] font-medium"
-                                        )}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
-                    {/* Pet Friendly Toggle */}
-                    <button
-                        onClick={() => handleFilterChange('petsAllowed', filters?.petsAllowed ? null : true)}
-                        className={cn(
-                            "flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
-                            filters?.petsAllowed
-                                ? "bg-[#134e4a]/10 border-[#134e4a] text-[#134e4a]"
-                                : "bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
-                        )}
-                    >
-                        🐾 Pet Friendly
-                    </button>
+                    {/* Guests Filter - Stays Only */}
+                    {searchMode === 'stays' && (
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'guests' ? null : 'guests')}
+                                className={cn(
+                                    "flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
+                                    filters?.minGuests !== null && filters?.minGuests !== undefined
+                                        ? "bg-[#134e4a]/10 border-[#134e4a] text-[#134e4a]"
+                                        : "bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                                )}
+                            >
+                                Guests
+                                <span className="text-[#134e4a] font-bold ml-1">{getGuestsLabel()}</span>
+                                <ChevronDown className={cn("w-3.5 h-3.5 opacity-50 transition-transform", openDropdown === 'guests' && "rotate-180")} />
+                            </button>
+                            {openDropdown === 'guests' && (
+                                <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[140px] z-50">
+                                    {GUEST_OPTIONS.map(opt => (
+                                        <button
+                                            key={opt.label}
+                                            onClick={() => handleFilterChange('minGuests', opt.value)}
+                                            className={cn(
+                                                "w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors",
+                                                filters?.minGuests === opt.value && "bg-[#134e4a]/10 text-[#134e4a] font-medium"
+                                            )}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
-                    <FilterButton label="Move-In Date" />
+                    {/* Home Type - Buy Only */}
+                    {searchMode === 'buy' && (
+                        <div className="relative">
+                            <button
+                                onClick={() => setOpenDropdown(openDropdown === 'homeType' ? null : 'homeType')}
+                                className={cn(
+                                    "flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
+                                    filters?.propertyType && filters.propertyType.length > 0
+                                        ? "bg-[#134e4a]/10 border-[#134e4a] text-[#134e4a]"
+                                        : "bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                                )}
+                            >
+                                Home Type
+                                <span className="text-[#134e4a] font-bold ml-1">{getPropertyTypeLabel()}</span>
+                                <ChevronDown className={cn("w-3.5 h-3.5 opacity-50 transition-transform", openDropdown === 'homeType' && "rotate-180")} />
+                            </button>
+                            {openDropdown === 'homeType' && (
+                                <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[200px] z-50 p-3">
+                                    <div className="space-y-2">
+                                        {HOME_TYPE_OPTIONS.map(opt => (
+                                            <label key={opt.value} className="flex items-center gap-2 cursor-pointer group">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={filters?.propertyType?.includes(opt.value) || false}
+                                                    onChange={() => togglePropertyType(opt.value)}
+                                                    className="w-4 h-4 border-gray-300 rounded text-[#134e4a] focus:ring-[#134e4a]"
+                                                />
+                                                <span className="text-sm text-gray-700">{opt.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Dates Filter - Stays Only (Mock) */}
+                    {searchMode === 'stays' && (
+                        <FilterButton label="Dates" icon={Calendar} value="any" />
+                    )}
+
+                    {/* Move-In Date - Rent Only */}
+                    {searchMode === 'rent' && (
+                        <FilterButton label="Move-In Date" />
+                    )}
 
                     {/* More Filters */}
                     <div className="relative">
